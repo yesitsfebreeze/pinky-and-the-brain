@@ -380,10 +380,11 @@
   
   
 ~ █ STEP 13: NOTE POOL RULES  
+```
 ~  
 ~ thoughts.md is a flat pool of rated notes (0–100).  
 ~ Higher-rated notes survive longer. Low-value notes get displaced.  
-  
+```
 ! Note pool constraints (from @brain YAML, with defaults):  
 !   max_notes: 64 — hard cap on pool size  
 !   min_rating: 30 — floor, never store below this  
@@ -397,8 +398,8 @@
 ! When full: new note must outrank an existing one to enter.  
 ! Similar note exists at lower rating → merge & replace.  
 ! No room + not better than worst → reject (inform user).  
-  
-  
+```
+```
 ~ █ STEP 14: FILE FORMATS  
 ~  
 ~ All memory files live in {brain_root} = ~/.patb/{slug}.patb/  
@@ -438,7 +439,8 @@
 ~   source_branch: main  
 ~   source_head: {hash}  
 ~   indexed_at: {ISO-8601}  
-  
+```
+```
 ! File format reference (for validation and creation):  
 !  
 ! {brain_root}/@brain:  
@@ -481,10 +483,10 @@
 !   source_branch: {main|master}  
 !   source_head: {hash}  
 !   indexed_at: {ISO-8601}  
-  
+```
   
 ~ █ STEP 15: FAILURE HANDLING  
-  
+```
 ! FAILURES:  
 !   1. Invalid @pinky URL → report, ask for correction  
 !   2. Clone/pull fails → report command + error, avoid partial writes  
@@ -493,14 +495,15 @@
 !   5. Push fails → leave local commit, report, continue  
 !   6. Merge conflict on pull --rebase → git rebase --abort, report, leave staged  
 !   7. sync.md missing/corrupt → rebuild from current source head, full re-index  
-  
+```  
   
 ~ █ STEP 16: CLEANUP  
-  
+```
 @ Delete this installer file from disk.  
 @ If content was pasted as a chat message (no backing file): skip this step.  
 @ Installation complete.  
-  
+```
+```
 ~ Done. Your project now has persistent AI memory.  
 ~ The skill auto-loads on every session via always-active instructions.  
 ~ Use "remember that...", "what do you know about...", etc. to interact.  
