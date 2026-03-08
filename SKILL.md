@@ -140,6 +140,11 @@ Selection pass — startup path (run after prune pass; applies only when no expl
   Notes not selected are not loaded into the prompt but remain in the pool for future prune.
   For explicit topic queries, the full pool is used instead — see Commands → "what do you know about X".
 
+  tree.md selection (run in same pass):
+    Sort all tree.md rows by Impact score (column 4) descending.
+    Surface only the top MAX_CONTEXT_FILES rows into session context (default: 5).
+    Remaining rows stay on disk; not loaded into the prompt.
+
 
 ## Catch-Up
 

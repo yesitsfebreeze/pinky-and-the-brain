@@ -16,7 +16,6 @@ Already implemented in SKILL.md:
 - Cross-project context via @pinky linked repos
 
 Not yet implemented:
-- Selective context loading (all notes loaded every session)
 - Structured concept relationships between notes
 - Configurable context limits for prompt assembly
 
