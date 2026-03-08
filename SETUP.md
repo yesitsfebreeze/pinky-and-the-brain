@@ -118,7 +118,7 @@ CONTEXT_DEPTH: {CONTEXT_DEPTH}          # max concept link hops, Phase 3 only (d
 Rules:
   - Omit PATB_URL if not set or equal to {REPO_URL}.patb (only store when it differs).
   - Omit empty FOLLOW/AVOID lists entirely.
-  - Use defaults: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING, HIBERNATION_DAYS=90, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2.
+  - Use defaults: MAX_NOTES=64, MIN_RATING=300, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING, HIBERNATION_DAYS=90, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2.
   - If file exists + valid: preserve user content, only fill missing fields.
   - If file exists but empty/invalid: overwrite.
 

@@ -28,7 +28,7 @@ Read configuration from {BRAIN_ROOT}/@brain:
   - Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, PRUNE_THRESHOLD, MAX_CONTEXT_NOTES, MAX_CONTEXT_FILES, MAX_LINKED_REPOS, CONTEXT_DEPTH
   - If PATB_URL is set: override BRAIN_REPO_URL with its value
   - Apply FOLLOW/AVOID as session constraints
-  - Defaults if missing: MAX_NOTES=64, MIN_RATING=30, PRUNE_THRESHOLD=MIN_RATING, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2
+  - Defaults if missing: MAX_NOTES=64, MIN_RATING=300, PRUNE_THRESHOLD=MIN_RATING, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2
 
 
 ## Resolve Identity
@@ -65,7 +65,7 @@ Read {BRAIN_ROOT}/@brain:
   Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, PRUNE_THRESHOLD, MAX_CONTEXT_NOTES, MAX_CONTEXT_FILES, MAX_LINKED_REPOS, CONTEXT_DEPTH
   If PATB_URL is set: override BRAIN_REPO_URL with its value
   Apply FOLLOW/AVOID as session constraints
-  Defaults: MAX_NOTES=64, MIN_RATING=30, PRUNE_THRESHOLD=MIN_RATING, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2
+  Defaults: MAX_NOTES=64, MIN_RATING=300, PRUNE_THRESHOLD=MIN_RATING, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2
 
 If @brain is missing or invalid (empty, no origin comment, no YAML):
   Create/repair using canonical format:
@@ -286,7 +286,7 @@ LIST:
 
 REMEMBER:
   1. Open {BRAIN_ROOT}/thoughts.md
-  2. Rate new note 0–100 based on usefulness
+  2. Rate new note 0–1000 based on usefulness
   3. If below MIN_RATING: inform user, don't store (unless they insist)
   4. If pool is at MAX_NOTES:
      - Similar note exists? → replace it (merge text, keep higher rating)
@@ -355,11 +355,11 @@ Mandatory — run after answering a user query that loaded notes from thoughts.m
 
   1. Scan which notes from the loaded pool were actually referenced in reasoning
   2. Apply score adjustments:
-     - Notes used in the response: +30
-     - Notes confirmed by code during the response: +50
-     - Notes loaded but never referenced: -10
-     - Notes contradicted by code or user: -80
-  3. Clamp all adjusted ratings to 0–100
+     - Notes used in the response: +300
+     - Notes confirmed by code during the response: +500
+     - Notes loaded but never referenced: -100
+     - Notes contradicted by code or user: -800
+  3. Clamp all adjusted ratings to 0–1000
   4. Remove notes that dropped below MIN_RATING
   5. Update `last_used` to today's date for all notes that received a positive adjustment
   6. Re-sort thoughts.md by rating (highest first)
@@ -411,12 +411,12 @@ git -C {BRAIN_ROOT} push
 
 Constraints (from @brain YAML, with defaults):
   MAX_NOTES: 64 — hard cap on pool size
-  MIN_RATING: 30 — floor, never store below this
+  MIN_RATING: 300 — floor, never store below this
 
 Each note format:
 ```
 #### {short title}
-<!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
+<!-- rating: {0–1000} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
 <!-- sources: {file1}, {file2} -->
 {body text}
 ```
@@ -436,11 +436,13 @@ When full: compute relevance() for all pool notes and the new note (see Load Mem
   New note relevance ≤ all existing → reject (inform user).
 
 Score adjustments — apply these rating changes when the event occurs:
-  `used in reasoning` → +30 (note was referenced to answer a query)
-  `confirmed by code` → +50 (note's claim was verified against actual code)
-  `unused recall` → -10 (note was loaded into context but never referenced)
-  `contradicted by code or user` → -80 (note's content was proven wrong)
-Adjusted ratings are clamped to 0–100. Notes that drop below MIN_RATING are removed.
+  `used in reasoning` → +300 (note was referenced to answer a query)
+  `confirmed by code` → +500 (note's claim was verified against actual code)
+  `unused recall` → -100 (note was loaded into context but never referenced)
+  `contradicted by code or user` → -800 (note's content was proven wrong)
+Adjusted ratings are clamped to 0–1000. Notes that drop below MIN_RATING are removed.
+
+Backward compatibility: notes with ratings in the old 0–100 scale (detected when rating ≤ 100 and the note was created before the 0–1000 upgrade) should be multiplied by 10 on first load.
 
 
 ## File Formats
@@ -467,7 +469,7 @@ Adjusted ratings are clamped to 0–100. Notes that drop below MIN_RATING are re
 
 {BRAIN_ROOT}/thoughts.md:
   #### {TITLE}
-  <!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
+  <!-- rating: {0–1000} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
   <!-- sources: {file1}, {file2} -->
   {BODY}
   (sorted highest rating first)

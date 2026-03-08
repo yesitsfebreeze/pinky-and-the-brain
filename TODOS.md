@@ -41,6 +41,9 @@ Not yet implemented: nothing in phases 1–3.
 
 ## Phase 4 — Integration & Docs
 
+Done:
+- Rating scale bumped to 0–1000; score adjustments ×10 (+300/+500/−100/−800); MIN_RATING default 300; backward-compat migration note added (SKILL.md, SETUP.md, README.md)
+
 ## Sequencing
 
 ```
