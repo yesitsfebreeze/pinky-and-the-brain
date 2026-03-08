@@ -111,9 +111,11 @@ Lines 2+: linked brain repo URLs
 **thoughts.md** — rated note pool (highest first)
 ```
 #### Short title
-<!-- rating: 85 -->
+<!-- rating: 85 | created: 2026-01-01 | last_used: 2026-03-01 | concepts: tag1, tag2 -->
+<!-- sources: src/foo.ts -->
 Body text.
 ```
+The `sources` line and `concepts` field are optional; omit when not applicable.
 
 **tree.md** — file impact map
 ```
@@ -132,3 +134,22 @@ SOURCE_BRANCH: main
 SOURCE_HEAD: {HASH}
 INDEXED_AT: {ISO-8601}
 ```
+
+## Context Loading
+
+At session start the full note pool in `thoughts.md` is processed in three passes before anything is loaded into the AI prompt:
+
+1. **Decay** — Each note's rating is reduced by `DECAY_RATE × days_since_last_used`. Notes idle longer than `HIBERNATION_DAYS` are frozen (no decay applied).
+2. **Prune** — Notes whose rating has fallen below `PRUNE_THRESHOLD` are deleted from `thoughts.md` and logged in `changes.md`.
+3. **Selection** — The surviving notes are ranked by relevance (base rating + recency bonus if used within 7 days + repo-match bonus if its sources exist in the current workspace). The top `MAX_CONTEXT_NOTES` notes are loaded into the session; the rest remain in the pool for future decay/prune cycles but are not included in the prompt.
+
+For explicit queries (`"what do you know about X"`) the full pool is searched instead of limiting to `MAX_CONTEXT_NOTES`.
+
+| Config key | Default | Effect |
+|---|---|---|
+| `DECAY_RATE` | `1` | Rating points lost per idle day |
+| `HIBERNATION_DAYS` | `90` | Days idle before decay freezes (`0` = disabled) |
+| `PRUNE_THRESHOLD` | `MIN_RATING` | Minimum rating to survive a prune pass |
+| `MAX_CONTEXT_NOTES` | `8` | Max notes loaded into a session prompt |
+| `MAX_CONTEXT_FILES` | `5` | Max `tree.md` entries surfaced per session |
+| `MAX_LINKED_REPOS` | `3` | Max linked brain repos queried per session |
