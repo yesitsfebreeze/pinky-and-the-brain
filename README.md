@@ -43,36 +43,33 @@ Read this configuration. If any required field still contains a
 {PLACEHOLDER}, stop and ask the user to fill it in before continuing.
 
 ```yaml
-SKILL_URL:  https://github.com/yesitsfebreeze/pinky-and-the-brain/SKILL.md
-REPO_URL:   https://github.com/{USER}/{REPO}  # can be inferred from `git remote get-url origin`
-# PATB_URL: https://github.com/{USER}/{REPO}.patb  # optional — override brain repo URL when it differs from {REPO_URL}.patb
-MAX_NOTES:  512
-MIN_RATING: 300
-# avoid: [
-#  "store unrelated data",
-#  ...
-# ]
-# follow: [
-#  "generate todos for ideas display them to the user when he types @todo"
-# ]
+SKILL_URL:         https://github.com/yesitsfebreeze/pinky-and-the-brain/SKILL.md
+REPO_URL:          https://github.com/{USER}/{REPO}  # can be inferred from `git remote get-url origin`
+# PATB_URL:        https://github.com/{USER}/{REPO}.patb  # optional — override brain repo URL when it differs from {REPO_URL}.patb
+MAX_NOTES:         512
+MIN_RATING:        300
+PRUNE_THRESHOLD:   300   # minimum rating to survive a prune pass (default: same as MIN_RATING)
+MAX_CONTEXT_NOTES: 8     # max notes loaded into prompt per session
+MAX_CONTEXT_FILES: 5     # max tree.md entries surfaced per session
+MAX_LINKED_REPOS:  3     # max linked brain repos queried per session
+CONTEXT_DEPTH:     2     # max concept-link hops during query expansion
+# avoid:
+#   - "store unrelated data"
+# follow:
+#   - "generate todos for ideas display them to the user when he types @todo"
 ```
 
 Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/SETUP.md
 
-## Resurrect
+## @resync
 
 If a project's p&b setup is broken or too far behind to self-update
 (e.g. missing update mechanism, corrupted skill, desynced branch),
-paste this into an AI chat to force a full re-install from latest main:
+type `@resync` in the AI chat to force a full re-install from latest main.
 
-```
-RESSURECT = TRUE
-Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/SETUP.md
-
-This is a ressurect/re-install over the existing setup.
-Preserve all user content: thoughts.md, changes.md, tree.md, sync.md, @pinky linked repos.
-Overwrite everything else (skill, instructions, @brain structure).
-```
+This will:
+- Preserve all user content: `thoughts.md`, `changes.md`, `tree.md`, `sync.md`, `@pinky` linked repos
+- Overwrite everything else: skill, instructions, `@brain` structure
 
 ## Commands
 
@@ -83,6 +80,7 @@ Overwrite everything else (skill, instructions, @brain structure).
 | "forget about..."          | Remove note, commit & push         |
 | "list brain contents"      | Show all brain repos + note counts |
 | `@commit`                  | Group changes by scope, create per-scope commits, push → triggers .patb indexing |
+| `@resync`                  | Force re-install from latest main — preserves user content, overwrites infrastructure |
 
 ## File Formats
 
@@ -138,18 +136,15 @@ INDEXED_AT: {ISO-8601}
 
 ## Context Loading
 
-At session start the full note pool in `thoughts.md` is processed in three passes before anything is loaded into the AI prompt:
+At session start the full note pool in `thoughts.md` is processed in two passes before anything is loaded into the AI prompt:
 
-1. **Decay** — Each note's rating is reduced by `DECAY_RATE × days_since_last_used`. Notes idle longer than `HIBERNATION_DAYS` are frozen (no decay applied).
-2. **Prune** — Notes whose rating has fallen below `PRUNE_THRESHOLD` are deleted from `thoughts.md` and logged in `changes.md`.
-3. **Selection** — The surviving notes are ranked by relevance (base rating + recency bonus if used within 7 days + repo-match bonus if its sources exist in the current workspace). The top `MAX_CONTEXT_NOTES` notes are loaded into the session; the rest remain in the pool for future decay/prune cycles but are not included in the prompt.
+1. **Prune** — Notes whose rating has fallen below `PRUNE_THRESHOLD` are deleted from `thoughts.md` and logged in `changes.md`.
+2. **Selection** — The surviving notes are ranked by relevance (base rating + recency bonus if used within 7 days + repo-match bonus if its sources exist in the current workspace). The top `MAX_CONTEXT_NOTES` notes are loaded into the session; the rest remain in the pool for future prune cycles but are not included in the prompt.
 
 For explicit queries (`"what do you know about X"`) the full pool is searched instead of limiting to `MAX_CONTEXT_NOTES`.
 
 | Config key | Default | Effect |
 |---|---|---|
-| `DECAY_RATE` | `1` | Rating points lost per idle day |
-| `HIBERNATION_DAYS` | `90` | Days idle before decay freezes (`0` = disabled) |
 | `PRUNE_THRESHOLD` | `MIN_RATING` | Minimum rating to survive a prune pass |
 | `MAX_CONTEXT_NOTES` | `8` | Max notes loaded into a session prompt |
 | `MAX_CONTEXT_FILES` | `5` | Max `tree.md` entries surfaced per session |

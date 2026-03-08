@@ -2,9 +2,9 @@
 
 This file handles both fresh installs and updates in a single flow.
 Fetched and executed by the README, by the skill version check,
-or manually via the @ressurect paste block.
+or manually via the `@resync` command.
 Configuration variables come from the README's configuration table (fresh install)
-or from the existing @brain file (update / ressurect).
+or from the existing @brain file (update / @resync).
 
 
 ## Pre-flight
@@ -14,7 +14,7 @@ Determine run mode:
   **INSTALL** — @pinky does NOT exist at workspace root.
     Fresh setup. All artifacts will be created from scratch.
 
-  **UPDATE** — @pinky EXISTS at workspace root (or RESSURECT = TRUE).
+  **UPDATE** — @pinky EXISTS at workspace root (or `@resync` was invoked).
     Existing setup. Read every existing artifact fully before modifying.
     Preserve all user content (thoughts.md, changes.md, tree.md, sync.md, @pinky linked repos).
     Overwrite infrastructure (skill, instructions, @brain structure — merging user YAML values).
@@ -329,6 +329,6 @@ These are compared during session start to detect when an update is available.
 
 Delete this installer file from disk (if it was written as a temp file).
 If content was pasted as a chat message (no backing file): skip this step.
-If RESSURECT = TRUE: inform user "Resurrect complete — p&b re-installed from latest main."
+If `@resync` was invoked: inform user "@resync complete — p&b re-installed from latest main."
 If UPDATE mode: inform user "Updated to {NEW_VERSION}. Changed: {LIST_OF_UPDATED_ARTIFACTS}."
 If INSTALL mode: inform user "Installation complete."
