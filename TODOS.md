@@ -42,7 +42,6 @@ Not yet implemented:
 ## Phase 4 — Integration & Docs
 
 ### 4.4 Version bumps
-- [ ] Bump install.version if SETUP.md changes
 - [ ] Tag releases in p&b repo
 
 ---
