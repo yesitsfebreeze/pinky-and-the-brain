@@ -15,7 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/yesitsfebreeze/pinky_and_the_brain/
 
 **Windows (PowerShell)**
 ```powershell
-irm https://raw.githubusercontent.com/yesitsfebreeze/pinky_and_the_brain/main/scripts/install.ps1 | iex
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/yesitsfebreeze/pinky_and_the_brain/main/scripts/install.ps1)))
 ```
 
 This will:
