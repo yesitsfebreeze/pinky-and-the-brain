@@ -168,6 +168,7 @@ Read indexed hash/timestamp from {BRAIN_ROOT}/sync.md (create if missing)
 If source is newer than indexed:
   Index all commits since indexed hash into thoughts.md, tree.md, changes.md
   Auto-tag each new note with 1–3 concept tags; add `concepts` field to its metadata comment
+  Rebuild concepts.md from all concept tags in thoughts.md (see File Formats)
   Update sync.md with new hash + timestamp
   Commit and push brain immediately
 
@@ -331,8 +332,10 @@ git -C {BRAIN_ROOT} fetch origin --prune
   5. Index new commits since last indexed hash:
      Extract decisions, pitfalls, conventions, integration-impacting changes
      Merge into thoughts.md with rating/threshold/cap rules
+     Auto-tag each new note with 1–3 concept tags; add `concepts` field to its metadata comment
      Refresh @brain description and tree.md from current source state
      Append cross-project-relevant changes to changes.md (cap 20, newest first)
+     Rebuild concepts.md from all concept tags in thoughts.md (see File Formats)
   6. Update {BRAIN_ROOT}/sync.md:
 ```
 SOURCE_BRANCH: {MAIN|MASTER}
@@ -426,6 +429,16 @@ Adjusted ratings are clamped to 0–100. Notes that drop below MIN_RATING are re
   SOURCE_BRANCH: {MAIN|MASTER}
   SOURCE_HEAD: {HASH}
   INDEXED_AT: {ISO-8601}
+
+{BRAIN_ROOT}/concepts.md (auto-generated, never manually edited):
+  #### {concept-tag}
+  <!-- related: {tag1}, {tag2}, {tag3} -->
+  <!-- files: {file1}, {file2} -->
+  <!-- repos: {slug1} -->
+  (sorted alphabetically by concept tag)
+  (related: co-occurring tags — appear together on the same note)
+  (files: union of sources across all notes that carry this tag)
+  (repos: brain slugs where this tag appears; omit line if only current repo)
 ````
 
 

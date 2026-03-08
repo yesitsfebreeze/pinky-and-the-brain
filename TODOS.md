@@ -30,18 +30,6 @@ Not yet implemented:
 **Risk: High.** New file structures, new indexing, new query paths.
 **Depends on:** Phase 1 (metadata) and Phase 2 (selection) being stable.
 
-### 3.3 Derived concept index (concepts.md)
-- [ ] Add `concepts.md` to brain root — auto-generated, never manually edited:
-  ```
-  #### tile-sorting
-  <!-- related: gpu-coherence, bitonic-sort, front-to-back-compositing -->
-  <!-- files: src/gpu/tile_sort.odin, src/render/compositor.odin -->
-  <!-- repos: phyons -->
-  ```
-- [ ] Rebuild from note tags on each sync (derived artifact)
-- [ ] Related concepts: computed by co-occurrence (two concepts appearing on same note)
-- [ ] Update SKILL.md File Formats section
-
 ### 3.4 Concept-aware queries
 - [ ] Enhance "what do you know about X":
   1. Match X against concept names in concepts.md
