@@ -55,18 +55,6 @@ Not yet implemented:
 **Priority: High.** Critical before note pools exceed ~30 notes.
 **Risk: Medium.** Changes the core load path — must not break session startup.
 
-### 2.1 Selection config in @brain YAML
-- [ ] Add new keys with defaults:
-  ```yaml
-  MAX_CONTEXT_NOTES: 8     # max notes loaded into prompt
-  MAX_CONTEXT_FILES: 5     # max tree.md entries surfaced
-  MAX_LINKED_REPOS: 3      # max linked repos queried
-  CONTEXT_DEPTH: 2         # max concept link hops (Phase 3 only)
-  ```
-- [ ] `MAX_NOTES` stays — caps storage. New keys cap what enters the prompt.
-- [ ] Update SKILL.md Configuration section with new keys + defaults
-- [ ] Update SETUP.md @brain template
-
 ### 2.2 Ranked loading in Load Memory
 - [ ] Replace "read all of thoughts.md" with selection algorithm:
   1. Parse all notes (title, rating, last_used, sources)
