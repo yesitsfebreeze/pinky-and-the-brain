@@ -44,12 +44,6 @@ Not yet implemented:
 - [x] Applied in-memory during Load Memory step
 - [x] Notes with unknown `last_used` skipped
 
-### 1.5 Confidence field — decision required
-- [ ] Evaluate: does `confidence` add value beyond what `rating + decay` already models?
-- [ ] If yes: define semantics — `low` (single observation), `medium` (multi-session), `high` (code-confirmed)
-- [ ] If no: drop it — rating trajectory already encodes trustworthiness
-- [ ] **Recommendation: defer.** Rating + decay is sufficient for v1. Revisit if scoring proves ambiguous.
-
 ### 1.6 Hibernation guard
 - [ ] If a project is untouched for >90 days, notes should not decay to zero
 - [ ] Option A: cap cumulative decay at 50% of original rating
