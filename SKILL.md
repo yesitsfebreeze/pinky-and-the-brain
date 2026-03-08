@@ -377,6 +377,28 @@ git -C {SOURCE_ROOT} diff --cached --quiet || git -C {SOURCE_ROOT} commit -m "{S
   8. Report what was done and what the next todo would be.
 
 
+### "@commit"
+
+COMMIT WORKFLOW:
+  1. Review uncommitted changes in {SOURCE_ROOT}:
+```
+git -C {SOURCE_ROOT} status --short
+git -C {SOURCE_ROOT} diff --cached --stat
+```
+  2. If nothing staged and nothing modified: report "Nothing to commit."
+  3. Stage all changes:
+```
+git -C {SOURCE_ROOT} add -A
+```
+  4. Write a concise conventional commit message based on what changed.
+  5. Commit and push:
+```
+git -C {SOURCE_ROOT} commit -m "{MESSAGE}"
+git -C {SOURCE_ROOT} push
+```
+  6. Run the full Post-Push indexing loop (see ## Post-Push).
+
+
 ## After Reasoning
 
 Mandatory — run after answering a user query that loaded notes from thoughts.md:

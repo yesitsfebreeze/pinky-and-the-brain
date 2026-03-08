@@ -77,11 +77,12 @@ Overwrite everything else (skill, instructions, @brain structure).
 ## Commands
 
 | Command                    | What it does                       |
-|----------------------------|------------------------------------|
+|----------------------------|---------------------------------|
 | "what do you know about X" | Search thoughts.md + linked repos  |
 | "remember that..."         | Rate + store note, commit & push   |
 | "forget about..."          | Remove note, commit & push         |
 | "list brain contents"      | Show all brain repos + note counts |
+| `@commit`                  | Stage all, write commit msg, push → triggers .patb indexing |
 
 ## File Formats
 
