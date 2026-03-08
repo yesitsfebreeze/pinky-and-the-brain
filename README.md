@@ -6,15 +6,23 @@ Persistent cross-project AI memory for AI coding assistants.
 
 Each project gets a companion `.patb` brain repo that stores AI memory — decisions, pitfalls, conventions, and cross-project context — so your AI assistant remembers things across sessions.
 
+{SOURCE_ROOT}
 ```
-{source_root}        sync ─►    {brain_root}
-┌ my-project/          │        ┌ ~/.patb/my-project.patb/
-├── @pinky             │        ├── @brain
-└── **/*.*             │        ├── purpose.md
-                       │        ├── thoughts.md
-                       │        ├── tree.md
-                       │        ├── changes.md
-                       │        └── sync.md
+┌ my-project/ 
+├── @pinky
+└── **/*.*
+```
+automatic ai sync into:
+
+{BRAIN_ROOT}
+```
+┌ ~/.patb/my-project.patb/ 
+├── @brain
+├── purpose.md
+├── thoughts.md
+├── tree.md
+├── changes.md
+└── sync.md
 ```
 
 ## Install
@@ -30,45 +38,50 @@ DRY_RUN = TRUE
 
 ## Configuration
 
-Read this configuration table. If any required field still contains a
-{placeholder}, stop and ask the user to fill it in before continuing.
+Read this configuration. If any required field still contains a
+{PLACEHOLDER}, stop and ask the user to fill it in before continuing.
 
-| Setting           | Value                                                    |
-|-------------------|----------------------------------------------------------|
-| Skill hub URL     | `https://github.com/yesitsfebreeze/pinky-and-the-brain`  |
-| Current repo URL  | `https://github.com/{user}/{repo}`                       |
-| Max notes         | `64`                                                     |
-| Min rating        | `30`                                                     |
-| Avoid (optional)  |                                                          |
-| Follow (optional) |                                                          |
+```yaml
+SKILL_URL:  https://github.com/yesitsfebreeze/pinky-and-the-brain/SKILL.md
+REPO_URL:   https://github.com/{USER}/{REPO}
+MAX_NOTES:  512
+MIN_RATING: 30
+# avoid: [
+#  "store unrelated data",
+#  ...
+# ]
+# follow: [
+#  "generate todos for ideas display them to the user when he types @todo"
+# ]
+```
 
 Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/INSTALL.md
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| "what do you know about X" | Search thoughts.md + linked repos |
-| "remember that..." | Rate + store note, commit & push |
-| "forget about..." | Remove note, commit & push |
-| "list brain contents" | Show all brain repos + note counts |
+| Command                    | What it does                       |
+|----------------------------|------------------------------------|
+| "what do you know about X" | Search thoughts.md + linked repos  |
+| "remember that..."         | Rate + store note, commit & push   |
+| "forget about..."          | Remove note, commit & push         |
+| "list brain contents"      | Show all brain repos + note counts |
 
 ## File Formats
 
-All memory files live in `{brain_root}` (`~/.patb/{slug}.patb/`):
+All memory files live in `{BRAIN_ROOT}` (`~/.patb/{SLUG}.patb/`):
 
 **@brain** — project identity + config
 ```
-<!-- main-brain-origin-source-url: {url} -->
+<!-- main-brain-origin-source-url: {URL} -->
 # Title
 Description
 ```
 ```yaml
-skill_hub_url: ...
-max_notes: 64
-min_rating: 30
-follow: [...]
-avoid: [...]
+SKILL_URL: ...
+MAX_NOTES: 64
+MIN_RATING: 30
+FOLLOW: [...]
+AVOID: [...]
 ```
 
 **@pinky** — at source repo root
@@ -97,7 +110,7 @@ Body text.
 
 **sync.md** — last indexed state
 ```
-source_branch: main
-source_head: {hash}
-indexed_at: {ISO-8601}
+SOURCE_BRANCH: main
+SOURCE_HEAD: {HASH}
+INDEXED_AT: {ISO-8601}
 ```

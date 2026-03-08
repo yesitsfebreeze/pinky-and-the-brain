@@ -2,65 +2,65 @@
 
 ## Configuration
 
-Read configuration from {brain_root}/@brain:
+Read configuration from {BRAIN_ROOT}/@brain:
   - Parse `main-brain-origin-source-url` from the HTML comment
-  - Parse YAML: skill_hub_url, follow, avoid, max_notes, min_rating
-  - Apply follow/avoid as session constraints
-  - Defaults if missing: max_notes=64, min_rating=30
+  - Parse YAML: SKILL_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING
+  - Apply FOLLOW/AVOID as session constraints
+  - Defaults if missing: MAX_NOTES=64, MIN_RATING=30
 
 
 ## Resolve Identity
 
 Determine source repo URL: `git remote get-url origin` (fallback to @pinky line 1)
-Derive {slug}: last path segment → strip .git → lowercase → sanitize
-Derive brain repo URL: {source-repo-url}.patb
-Set brain root = ~/.patb/{slug}.patb/
+Derive {SLUG}: last path segment → strip .git → lowercase → sanitize
+Derive BRAIN_REPO_URL: {SOURCE_REPO_URL}.patb
+Set BRAIN_ROOT = ~/.patb/{SLUG}.patb/
 
 
 ## Sync Brain Repo
 
-If ~/.patb/{slug}.patb/.git does not exist:
-  git clone {brain-repo-url} ~/.patb/{slug}.patb/
+If ~/.patb/{SLUG}.patb/.git does not exist:
+  git clone {BRAIN_REPO_URL} ~/.patb/{SLUG}.patb/
 If it exists:
   Verify remote matches expected URL
-  Check for uncommitted changes: `git -C {brain_root} status --porcelain`
-  If changes: git add -A && commit "pb: update ({n} notes)" → pull --rebase → push
-  If clean: `git -C {brain_root} pull --rebase`
+  Check for uncommitted changes: `git -C {BRAIN_ROOT} status --porcelain`
+  If changes: git add -A && commit "pb: update ({N} notes)" → pull --rebase → push
+  If clean: `git -C {BRAIN_ROOT} pull --rebase`
 If working inside a .patb repo directly: use cwd as brain root, skip clone/pull
 
 
 ## @brain
 
-Read {brain_root}/@brain:
+Read {BRAIN_ROOT}/@brain:
   Parse `main-brain-origin-source-url` from the HTML comment
-  Parse YAML: skill_hub_url, follow, avoid, max_notes, min_rating
-  Apply follow/avoid as session constraints
-  Defaults: max_notes=64, min_rating=30
+  Parse YAML: SKILL_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING
+  Apply FOLLOW/AVOID as session constraints
+  Defaults: MAX_NOTES=64, MIN_RATING=30
 
 If @brain is missing or invalid (empty, no origin comment, no YAML):
   Create/repair using canonical format:
 
 ````
-<!-- main-brain-origin-source-url: {url} -->
-# {title}
+<!-- main-brain-origin-source-url: {URL} -->
+# {TITLE}
 
-{description}
+{DESCRIPTION}
 
 ```yaml
-skill_hub_url: {url}
-follow:
-  - {constraint}
-avoid:
-  - {constraint}
-max_notes: {N}
-min_rating: {N}
+SKILL_URL: {URL}
+FOLLOW:
+  - {CONSTRAINT}
+AVOID:
+  - {CONSTRAINT}
+MAX_NOTES: {N}
+MIN_RATING: {N}
 ```
 ````
 
 
 ## @pinky
 
-Read {source_root}/@pinky:
+Read {SOURCE_ROOT}/@pinky:
   Line 1: current repo URL
   Lines 2+: linked .patb repo URLs
 If missing: create with URL from `git remote get-url origin` on line 1.
@@ -68,9 +68,9 @@ If missing: create with URL from `git remote get-url origin` on line 1.
 
 ## Load Memory
 
-Read {brain_root}/purpose.md — project purpose and scope
-Read {brain_root}/thoughts.md — rated note pool
-Read {brain_root}/tree.md — file tree with impact ratings
+Read {BRAIN_ROOT}/purpose.md — project purpose and scope
+Read {BRAIN_ROOT}/thoughts.md — rated note pool
+Read {BRAIN_ROOT}/tree.md — file tree with impact ratings
 
 If any memory file is missing (first sync / register):
   Infer purpose from README.md, config files, entry points
@@ -86,13 +86,13 @@ If any memory file is missing (first sync / register):
 Determine default branches: prefer main, fallback master (for both repos)
 
 ```
-git -C {source_root} fetch origin --prune
-git -C {brain_root} fetch origin --prune
+git -C {SOURCE_ROOT} fetch origin --prune
+git -C {BRAIN_ROOT} fetch origin --prune
 ```
 
 If brain local is behind origin: pull --rebase first
-Read source head hash/timestamp from origin/{source_branch}
-Read indexed hash/timestamp from {brain_root}/sync.md (create if missing)
+Read source head hash/timestamp from origin/{SOURCE_BRANCH}
+Read indexed hash/timestamp from {BRAIN_ROOT}/sync.md (create if missing)
 If source is newer than indexed:
   Index all commits since indexed hash into thoughts.md, tree.md, changes.md
   Update sync.md with new hash + timestamp
@@ -102,14 +102,14 @@ If source is newer than indexed:
 ## Cross-Project Context
 
 For each linked .patb URL in @pinky lines 2+:
-  Check for local clone at ~/.patb/{link-slug}.patb/
+  Check for local clone at ~/.patb/{LINK_SLUG}.patb/
   If present: read purpose.md
   If not present: fetch purpose.md via raw URL:
 
 ```
-GitHub:  https://raw.githubusercontent.com/{owner}/{repo}/{branch}/purpose.md
-GitLab:  https://gitlab.com/{owner}/{repo}/-/raw/{branch}/purpose.md
-Other:   use host's raw endpoint for {default-branch}
+GitHub:  https://raw.githubusercontent.com/{OWNER}/{REPO}/{BRANCH}/purpose.md
+GitLab:  https://gitlab.com/{OWNER}/{REPO}/-/raw/{BRANCH}/purpose.md
+Other:   use host's raw endpoint for {DEFAULT_BRANCH}
 ```
 
   Default branch detection: git symbolic-ref, or try main then master
@@ -124,7 +124,7 @@ Other:   use host's raw endpoint for {default-branch}
 ### "what do you know about X"
 
 QUERY:
-  1. Read {brain_root}/purpose.md and thoughts.md
+  1. Read {BRAIN_ROOT}/purpose.md and thoughts.md
   2. Search notes for the topic
   3. For each linked .patb in @pinky:
      Read purpose.md — skip if project not relevant to query
@@ -141,10 +141,10 @@ LIST:
 ### "remember that..."
 
 REMEMBER:
-  1. Open {brain_root}/thoughts.md
+  1. Open {BRAIN_ROOT}/thoughts.md
   2. Rate new note 0–100 based on usefulness
-  3. If below min_rating: inform user, don't store (unless they insist)
-  4. If pool is at max_notes:
+  3. If below MIN_RATING: inform user, don't store (unless they insist)
+  4. If pool is at MAX_NOTES:
      - Similar note with lower rating? → replace it (merge text, keep higher rating)
      - New rating > lowest existing? → drop lowest
      - New rating < all existing? → inform user, don't store (unless they insist)
@@ -153,26 +153,26 @@ REMEMBER:
   7. Commit and push:
 
 ```
-git -C {brain_root} pull --rebase
-git -C {brain_root} add -A
-git -C {brain_root} diff --cached --quiet || git -C {brain_root} commit -m "pb: remember - {summary}"
-git -C {brain_root} push
+git -C {BRAIN_ROOT} pull --rebase
+git -C {BRAIN_ROOT} add -A
+git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: remember - {SUMMARY}"
+git -C {BRAIN_ROOT} push
 ```
 
 ### "forget about..."
 
 FORGET:
-  1. Search {brain_root}/thoughts.md for matching notes
+  1. Search {BRAIN_ROOT}/thoughts.md for matching notes
   2. Show matches, ask for confirmation
   3. Remove confirmed notes
   4. Re-sort by rating (highest first)
   5. Commit and push:
 
 ```
-git -C {brain_root} pull --rebase
-git -C {brain_root} add -A
-git -C {brain_root} diff --cached --quiet || git -C {brain_root} commit -m "pb: forget - {summary}"
-git -C {brain_root} push
+git -C {BRAIN_ROOT} pull --rebase
+git -C {BRAIN_ROOT} add -A
+git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: forget - {SUMMARY}"
+git -C {BRAIN_ROOT} push
 ```
 
 
@@ -182,37 +182,37 @@ Mandatory — run immediately after successful source git push:
 
   1. Fetch both repos:
 ```
-git -C {source_root} fetch origin --prune
-git -C {brain_root} fetch origin --prune
+git -C {SOURCE_ROOT} fetch origin --prune
+git -C {BRAIN_ROOT} fetch origin --prune
 ```
   2. Resolve branches: main if present, else master (each repo)
-  3. If brain behind origin/{brain_branch}: pull --rebase
-  4. Compare source tip hash vs {brain_root}/sync.md indexed hash
+  3. If brain behind origin/{BRAIN_BRANCH}: pull --rebase
+  4. Compare source tip hash vs {BRAIN_ROOT}/sync.md indexed hash
      If source tip is not newer: stop (nothing to index)
   5. Index new commits since last indexed hash:
      Extract decisions, pitfalls, conventions, integration-impacting changes
      Merge into thoughts.md with rating/threshold/cap rules
      Refresh purpose.md and tree.md from current source state
      Append cross-project-relevant changes to changes.md (cap 20, newest first)
-  6. Update {brain_root}/sync.md:
+  6. Update {BRAIN_ROOT}/sync.md:
 ```
-source_branch: {main|master}
-source_head: {new-hash}
-indexed_at: {now-ISO8601}
+SOURCE_BRANCH: {MAIN|MASTER}
+SOURCE_HEAD: {NEW_HASH}
+INDEXED_AT: {NOW_ISO8601}
 ```
   7. Commit and push:
 ```
-git -C {brain_root} add -A
-git -C {brain_root} diff --cached --quiet || git -C {brain_root} commit -m "pb: index source push - {summary}"
-git -C {brain_root} push
+git -C {BRAIN_ROOT} add -A
+git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: index source push - {SUMMARY}"
+git -C {BRAIN_ROOT} push
 ```
 
 
 ## Note Pool Rules
 
 Constraints (from @brain YAML, with defaults):
-  max_notes: 64 — hard cap on pool size
-  min_rating: 30 — floor, never store below this
+  MAX_NOTES: 64 — hard cap on pool size
+  MIN_RATING: 30 — floor, never store below this
 
 Each note format:
 ```
@@ -230,46 +230,46 @@ No room + not better than worst → reject (inform user).
 ## File Formats
 
 ````
-{brain_root}/@brain:
-  <!-- main-brain-origin-source-url: {url} -->
-  # {title}
-  {description}
+{BRAIN_ROOT}/@brain:
+  <!-- main-brain-origin-source-url: {URL} -->
+  # {TITLE}
+  {DESCRIPTION}
   ```yaml
-  skill_hub_url: {url}
-  follow:
-    - {constraint}
-  avoid:
-    - {constraint}
-  max_notes: {N}
-  min_rating: {N}
+  SKILL_URL: {URL}
+  FOLLOW:
+    - {CONSTRAINT}
+  AVOID:
+    - {CONSTRAINT}
+  MAX_NOTES: {N}
+  MIN_RATING: {N}
   ```
 
-{source_root}/@pinky:
+{SOURCE_ROOT}/@pinky:
   Line 1: source repo URL
   Lines 2+: linked .patb URLs
 
-{brain_root}/purpose.md:
-  # {slug}
+{BRAIN_ROOT}/purpose.md:
+  # {SLUG}
   {1–3 sentence purpose}
 
-{brain_root}/thoughts.md:
-  #### {title}
+{BRAIN_ROOT}/thoughts.md:
+  #### {TITLE}
   <!-- rating: {0–100} -->
-  {body}
+  {BODY}
   (sorted highest rating first)
 
-{brain_root}/tree.md:
+{BRAIN_ROOT}/tree.md:
   | File | Access Rate (1–10) | Line Count | Impact (1–10) | Notes |
 
-{brain_root}/changes.md:
-  #### {YYYY-MM-DD} — {title}
+{BRAIN_ROOT}/changes.md:
+  #### {YYYY-MM-DD} — {TITLE}
   {1–2 sentence body}
   (newest first, cap 20)
 
-{brain_root}/sync.md:
-  source_branch: {main|master}
-  source_head: {hash}
-  indexed_at: {ISO-8601}
+{BRAIN_ROOT}/sync.md:
+  SOURCE_BRANCH: {MAIN|MASTER}
+  SOURCE_HEAD: {HASH}
+  INDEXED_AT: {ISO-8601}
 ````
 
 
@@ -277,7 +277,7 @@ No room + not better than worst → reject (inform user).
 
 1. Invalid @pinky URL → report, ask for correction
 2. Clone/pull fails → report command + error, avoid partial writes
-3. Brain repo doesn't exist remotely → guide user to create {slug}.patb
+3. Brain repo doesn't exist remotely → guide user to create {SLUG}.patb
 4. Path collision / illegal path → sanitize and log mapping
 5. Push fails → leave local commit, report, continue
 6. Merge conflict on pull --rebase → git rebase --abort, report, leave staged
