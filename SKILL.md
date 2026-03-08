@@ -1,5 +1,25 @@
 # Pinky & The Brain — Skill
 
+## Version Check
+
+Fetch the remote version files:
+```
+https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/install.version
+https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skill.version
+```
+
+Compare line 2 (timestamp) of each against the local copies:
+  {BRAIN_ROOT}/install.version
+  ~/.agents/skills/patb/skill.version
+
+If either local file is missing: treat as outdated.
+If any remote timestamp is newer than local:
+  Inform the user: "p&b update available ({COMPONENT} {LOCAL_VERSION} → {REMOTE_VERSION})."
+  Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/UPDATE.md
+
+If versions match: continue with normal session lifecycle.
+
+
 ## Configuration
 
 Read configuration from {BRAIN_ROOT}/@brain:

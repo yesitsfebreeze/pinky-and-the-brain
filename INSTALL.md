@@ -181,6 +181,21 @@ INDEXED_AT: {NOW_ISO8601}
 ```
 
 
+## Store Versions
+
+Fetch the current version files from remote:
+```
+https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/install.version
+https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skill.version
+```
+
+Write their contents to:
+  {BRAIN_ROOT}/install.version
+  ~/.agents/skills/patb/skill.version
+
+These are compared during session start to detect when an update is available.
+
+
 ## Cleanup
 
 Delete this installer file from disk.
