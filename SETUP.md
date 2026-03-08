@@ -107,19 +107,20 @@ MAX_NOTES: {MAX_NOTES}
 MIN_RATING: {MIN_RATING}
 DECAY_RATE: {DECAY_RATE}
 PRUNE_THRESHOLD: {PRUNE_THRESHOLD}
+HIBERNATION_DAYS: {HIBERNATION_DAYS}  # freeze decay after this many days idle (default: 90, 0 = disabled)
 ```
 ````
 
 Rules:
   - Omit PATB_URL if not set or equal to {REPO_URL}.patb (only store when it differs).
   - Omit empty FOLLOW/AVOID lists entirely.
-  - Use defaults: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING.
+  - Use defaults: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING, HIBERNATION_DAYS=90.
   - If file exists + valid: preserve user content, only fill missing fields.
   - If file exists but empty/invalid: overwrite.
 
 **UPDATE mode** — Read existing @brain fully, then:
   - Preserve: user-edited title and description
-  - Preserve: user-edited YAML values (MAX_NOTES, MIN_RATING, DECAY_RATE, PRUNE_THRESHOLD, FOLLOW, AVOID)
+  - Preserve: user-edited YAML values (MAX_NOTES, MIN_RATING, DECAY_RATE, PRUNE_THRESHOLD, HIBERNATION_DAYS, FOLLOW, AVOID)
   - Update: any new required fields the template introduces (merge with defaults)
   - If file is missing or invalid: recreate using canonical format above
 

@@ -25,10 +25,10 @@ If versions match: continue with normal session lifecycle.
 
 Read configuration from {BRAIN_ROOT}/@brain:
   - Parse `main-brain-origin-source-url` from the HTML comment
-  - Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, DECAY_RATE, PRUNE_THRESHOLD
+  - Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, DECAY_RATE, PRUNE_THRESHOLD, HIBERNATION_DAYS
   - If PATB_URL is set: override BRAIN_REPO_URL with its value
   - Apply FOLLOW/AVOID as session constraints
-  - Defaults if missing: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING
+  - Defaults if missing: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING, HIBERNATION_DAYS=90
 
 
 ## Resolve Identity
@@ -62,10 +62,10 @@ If working inside a .patb repo directly: use cwd as brain root, skip clone/pull
 
 Read {BRAIN_ROOT}/@brain:
   Parse `main-brain-origin-source-url` from the HTML comment
-  Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, DECAY_RATE, PRUNE_THRESHOLD
+  Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, DECAY_RATE, PRUNE_THRESHOLD, HIBERNATION_DAYS
   If PATB_URL is set: override BRAIN_REPO_URL with its value
   Apply FOLLOW/AVOID as session constraints
-  Defaults: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING
+  Defaults: MAX_NOTES=64, MIN_RATING=30, DECAY_RATE=1, PRUNE_THRESHOLD=MIN_RATING, HIBERNATION_DAYS=90
 
 If @brain is missing or invalid (empty, no origin comment, no YAML):
   Create/repair using canonical format:
@@ -87,6 +87,7 @@ MAX_NOTES: {N}
 MIN_RATING: {N}
 DECAY_RATE: {N}  # rating points lost per day since last_used (default: 1)
 PRUNE_THRESHOLD: {N}  # minimum rating to survive prune pass (default: same as MIN_RATING)
+HIBERNATION_DAYS: {N}  # freeze decay after this many days idle (default: 90, 0 = disabled)
 ```
 ````
 
@@ -113,6 +114,7 @@ If any memory file is missing (first sync / register):
 Decay pass (run after loading thoughts.md):
   For each note with a valid `last_used` date:
     Calculate `days_since = (today - last_used).days`
+    If HIBERNATION_DAYS > 0 and days_since > HIBERNATION_DAYS: skip decay (hibernation guard)
     Apply `rating -= days_since * DECAY_RATE` (DECAY_RATE from @brain YAML, default 1)
     Cap: if rating < 0, set rating = 0
   Notes missing `last_used` (unknown): skip decay, leave rating unchanged

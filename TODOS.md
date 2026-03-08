@@ -44,11 +44,9 @@ Not yet implemented:
 - [x] Applied in-memory during Load Memory step
 - [x] Notes with unknown `last_used` skipped
 
-### 1.6 Hibernation guard
-- [ ] If a project is untouched for >90 days, notes should not decay to zero
-- [ ] Option A: cap cumulative decay at 50% of original rating
-- [ ] Option B: freeze decay when `days_since_last_used > HIBERNATION_DAYS` (configurable)
-- [ ] Add `HIBERNATION_DAYS` to @brain YAML (default: 90, 0 = disabled)
+### 1.6 Hibernation guard ✅
+- [x] Freeze decay when `days_since_last_used > HIBERNATION_DAYS` (Option B)
+- [x] `HIBERNATION_DAYS` in @brain YAML (default: 90, 0 = disabled)
 
 ---
 
