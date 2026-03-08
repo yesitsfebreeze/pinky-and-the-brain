@@ -104,6 +104,7 @@ If remote mismatch: ask whether to switch remote or use alternate directory.
 If `{brain_root}/.brain/{slug}/meta.md` does not exist:
 1. Infer project purpose by reading: `README.md`, top-level config files, entry point files
 2. Write `{brain_root}/.brain/{slug}/meta.md`:
+3. Append an entry to `{brain_root}/.brain/index.md` (create if absent) — see format below
 
 ```markdown
 # {slug}
@@ -121,11 +122,20 @@ If `{brain_root}/.brain/{slug}/meta.md` does not exist:
 {ISO-8601 timestamp}
 ```
 
+**Index entry format** — append to `{brain_root}/.brain/index.md`:
+```markdown
+## {slug}
+- **Source**: {line-2 URL}
+- **Purpose**: {one sentence summary}
+- **Indexed**: {ISO-8601 timestamp}
+```
+The index file is the fast lookup table for cross-project search — scan it first before reading individual `meta.md` files.
+
 ### 5) Cross-Project Memory Search
 Before answering any question, always:
-1. List all directories under `{brain_root}/.brain/` — each is a project slug
+1. Read `{brain_root}/.brain/index.md` — fast overview of all known projects
 2. For the **current slug**: read relevant `{language}/{filepath}.md` notes
-3. For **all other slugs**: scan `meta.md` for relevance; read related file notes if applicable
+3. For **other slugs** that look relevant (based on index): read their `meta.md` and related file notes
 4. For each URL in the `# interesting` section of `@pinky`:
    - Check if that repo has a slug folder under `.brain/`
    - If not, fetch the repo's README or public file tree for context (read-only)
@@ -186,9 +196,16 @@ Rewrite `@pinky` in place, preserving exact format:
    4. Build / test / tooling
    5. Minor docs or style-only edits
 
-### 9) Commit Memory Changes
+### 9) Sync Global Skill Copy
+After pulling the brain repo, keep the global Copilot skill in sync:
+1. If `~/.copilot/skills/pinky-memory/SKILL.md` exists and differs from `{brain_root}/SKILL.md`:
+   - Copy `{brain_root}/SKILL.md` → `~/.copilot/skills/pinky-memory/SKILL.md`
+   - This ensures the AI always runs the latest version of the skill
+2. Skip if this is the brain repo itself (the file is already local)
+
+### 10) Commit Memory Changes
 In `{brain_root}`:
-1. `git add .brain/{slug}/`
+1. `git add .brain/{slug}/ .brain/index.md`
 2. Also stage `@pinky` if it changed
 3. Commit: `pinky: update {slug} ({n} files)`
 4. Push. If push fails: leave local commit, report status, continue.
@@ -197,9 +214,11 @@ In `{brain_root}`:
 1. `@pinky` exists with valid lines 1 and 2
 2. Brain root is identified (local dir or `~/.pinky/` clone)
 3. `{brain_root}/.brain/{slug}/meta.md` exists
-4. Memory note files written for all important touched files
-5. `@pinky` `# files` section reflects ranked touched files
-6. Git commit created in brain root (or explicit reason why not)
+4. `{brain_root}/.brain/index.md` has an entry for this slug
+5. Memory note files written for all important touched files
+6. `~/.copilot/skills/pinky-memory/SKILL.md` is in sync with brain repo
+7. `@pinky` `# files` section reflects ranked touched files
+8. Git commit created in brain root (or explicit reason why not)
 
 ## Failure Handling
 1. Invalid URL on line 1 → report and ask for correction
