@@ -79,10 +79,13 @@ Overwrite everything else (skill, instructions, @brain structure).
 | Command                    | What it does                       |
 |----------------------------|---------------------------------|
 | "what do you know about X" | Search thoughts.md + linked repos  |
-| "remember that..."         | Rate + store note, commit & push   |
-| "forget about..."          | Remove note, commit & push         |
-| "list brain contents"      | Show all brain repos + note counts |
+| `@remember <that...>`      | Rate + store note, commit & push   |
+| `@forget <about...>`       | Search for matching notes, confirm, remove, commit & push |
+| `@brain`                   | List all brain repos + note counts; show all notes for a specific slug |
+| `@prune`                   | Remove all notes below PRUNE_THRESHOLD, commit & push |
 | `@commit`                  | Group changes by scope, create per-scope commits, push → triggers .patb indexing |
+| `@process`                 | Pick the most impactful next todo from `@plan`, gather context, solve it, delete the todo, and commit |
+| `@resync`                  | Re-install p&b from latest main, preserving all user content |
 
 ## File Formats
 

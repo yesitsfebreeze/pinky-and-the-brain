@@ -275,14 +275,14 @@ QUERY PATH — full-pool concept-aware topic search:
   7. Present findings concisely — cite which brain repo each came from.
      If concepts were matched: list matched concept tags and hop depth per tag.
 
-### "list brain contents"
+### "@brain"
 
 LIST:
   1. List all *.patb/ directories under ~/.patb/
   2. For each: read @brain + thoughts.md → show name, purpose, note count
   3. If specific slug given: show all notes with ratings
 
-### "remember that..."
+### "@remember <that...>"
 
 REMEMBER:
   1. Open {BRAIN_ROOT}/thoughts.md
@@ -309,7 +309,7 @@ git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: 
 git -C {BRAIN_ROOT} push
 ```
 
-### "forget about..."
+### "@forget <about...>"
 
 FORGET:
   1. Search {BRAIN_ROOT}/thoughts.md for matching notes
@@ -325,7 +325,7 @@ git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: 
 git -C {BRAIN_ROOT} push
 ```
 
-### "prune notes"
+### "@prune"
 
 PRUNE:
   1. Load the full note pool from {BRAIN_ROOT}/thoughts.md
@@ -349,7 +349,7 @@ git -C {BRAIN_ROOT} push
        Report: "Pruned {N} notes. Pool now has {remaining} notes."
 
 
-### "@process" / "do the next todo"
+### "@process"
 
 TODO WORKFLOW:
   1. Open {SOURCE_ROOT}/@plan.
