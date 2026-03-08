@@ -31,6 +31,7 @@ automatic ai sync into:
 
 If the workspace has a git remote, `REPO_URL` is inferred automatically via `git remote get-url origin`.
 Otherwise, fill in `REPO_URL` in the config below before pasting.
+If the `.patb` brain repo doesn't exist on your remote yet, the AI will ask if you want to create and push it.
 The AI will fetch the installer and set everything up automatically.
 
 <!-- Uncomment for dry run:

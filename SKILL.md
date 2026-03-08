@@ -21,6 +21,10 @@ Set BRAIN_ROOT = ~/.patb/{SLUG}.patb/
 
 If ~/.patb/{SLUG}.patb/.git does not exist:
   git clone {BRAIN_REPO_URL} ~/.patb/{SLUG}.patb/
+  If clone fails (remote doesn't exist):
+    Ask the user: "The brain repo {BRAIN_REPO_URL} doesn't exist on your remote yet. Want me to create it locally and push it?"
+    If yes: init local repo, add remote, commit all memory files, push
+    If no: init local repo without remote, brain works locally only
 If it exists:
   Verify remote matches expected URL
   Check for uncommitted changes: `git -C {BRAIN_ROOT} status --porcelain`

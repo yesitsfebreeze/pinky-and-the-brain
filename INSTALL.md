@@ -55,8 +55,15 @@ Ensure ~/.patb/ directory exists.
 If ~/.patb/{SLUG}.patb/.git already exists: keep it, already set up.
 Otherwise: git clone {BRAIN_REPO_URL} ~/.patb/{SLUG}.patb/
 If clone fails (remote doesn't exist):
-  Tell user to create {BRAIN_REPO_URL} on their git host.
-  Fallback: mkdir -p ~/.patb/{SLUG}.patb/ && git -C ~/.patb/{SLUG}.patb/ init
+  Ask the user: "The brain repo {BRAIN_REPO_URL} doesn't exist on your remote yet. Want me to create it locally and push it?"
+  If yes:
+    mkdir -p ~/.patb/{SLUG}.patb/
+    git -C ~/.patb/{SLUG}.patb/ init
+    git -C ~/.patb/{SLUG}.patb/ remote add origin {BRAIN_REPO_URL}
+    (after @brain + memory files are written, commit and push — the remote repo will be created on first push if the host supports it, otherwise instruct the user to create the empty repo on their git host first)
+  If no:
+    mkdir -p ~/.patb/{SLUG}.patb/ && git -C ~/.patb/{SLUG}.patb/ init
+    Skip remote setup. Brain works locally only until user adds a remote.
 
 
 ## @brain
