@@ -250,6 +250,8 @@ QUERY PATH — full-pool concept-aware topic search:
      Read @brain — skip if project not relevant to query.
      If relevant: sub-search that repo's FULL thoughts.md and concepts.md using the same scoring.
   6. Cap total surfaced notes at MAX_CONTEXT_NOTES (ranked by combined score, across all repos).
+     For each surfaced note with a `related-notes` field: if any referenced notes exist in the pool
+     and are not yet selected, include them in the output (still subject to MAX_CONTEXT_NOTES cap).
   7. Present findings concisely — cite which brain repo each came from.
      If concepts were matched: list matched concept tags and hop depth per tag.
 
@@ -276,6 +278,7 @@ REMEMBER:
      - Set `last_used` to today's date
      - Set `sources` to relevant repo-relative file paths (if applicable)
      - Auto-suggest 1–3 concept tags reflecting the note's topic; add `concepts` field to the metadata comment if any apply
+     - Scan pool for notes sharing ≥1 concept tag with the new note; suggest at most 3 as `related-notes` candidates; add `related-notes` field if user accepts (omit field if none proposed or declined)
   6. Re-sort by rating (highest first)
   7. Commit and push:
 
@@ -393,7 +396,7 @@ Constraints (from @brain YAML, with defaults):
 Each note format:
 ```
 #### {short title}
-<!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} -->
+<!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
 <!-- sources: {file1}, {file2} -->
 {body text}
 ```
@@ -402,8 +405,9 @@ Each note format:
 - `last_used`: date the note was last referenced in reasoning
 - `sources`: comma-separated repo-relative file paths the note relates to (omit line if none)
 - `concepts`: comma-separated concept tags reflecting the note's topic (omit field if none)
+- `related-notes`: comma-separated short titles of directly related notes in this pool (omit field if none)
 
-Backward compatibility: notes missing `created` or `last_used` are treated as `created: unknown`, `last_used: unknown`. Notes missing `sources` have no source context. Notes missing `concepts` have no tags and work normally.
+Backward compatibility: notes missing `created` or `last_used` are treated as `created: unknown`, `last_used: unknown`. Notes missing `sources` have no source context. Notes missing `concepts` have no tags and work normally. Notes missing `related-notes` have no direct note links and work normally.
 
 Pool is sorted by rating, highest first.
 When full: compute relevance() for all pool notes and the new note (see Load Memory → Selection pass).
@@ -443,14 +447,16 @@ Adjusted ratings are clamped to 0–100. Notes that drop below MIN_RATING are re
 
 {BRAIN_ROOT}/thoughts.md:
   #### {TITLE}
-  <!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} -->
+  <!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
   <!-- sources: {file1}, {file2} -->
   {BODY}
   (sorted highest rating first)
   (sources line omitted when no files are relevant)
   (concepts field omitted when no tags apply)
+  (related-notes field omitted when no direct note links exist)
   (notes missing created/last_used fields: treat as unknown)
   (notes missing concepts field: no tags, work normally)
+  (notes missing related-notes field: no direct links, work normally)
 
 {BRAIN_ROOT}/tree.md:
   | File | Access Rate (1–10) | Line Count | Impact (1–10) | Notes |

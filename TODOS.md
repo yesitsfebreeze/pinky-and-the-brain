@@ -11,21 +11,24 @@ Already implemented in SKILL.md:
 - Rating 0–100 on notes, MIN_RATING floor, MAX_NOTES cap, pool replacement
 - Score adjustments: +30 used, +50 confirmed, -10 unused, -80 contradicted
 - Pool eviction by relevance score: `rating + recency_bonus + repo_match_bonus` (evicts least-relevant when full)
-- Pruning: notes below PRUNE_THRESHOLD removed on load and after After Reasoning adjustments
-- Note metadata: `created`, `last_used`, `sources`
+- Pruning: notes below PRUNE_THRESHOLD removed on load, after After Reasoning, and via standalone `prune notes` command
+- Note metadata: `created`, `last_used`, `sources`, `concepts`, `related-notes`
 - Cross-project context via @pinky linked repos
+- Concept tagging: inline `concepts` field on notes; auto-suggested on `remember`
+- Concept index: auto-generated `concepts.md` with co-occurrence `related` links
+- Concept-aware queries: BFS expansion through `related` links up to `CONTEXT_DEPTH` hops
+- Structured concept relationships: direct note-to-note `related-notes` links; suggested on `remember`; cascade-included in query results
+- Selective context loading: relevance-ranked, capped by `MAX_CONTEXT_NOTES` and `MAX_CONTEXT_FILES`
+- Dual context loading paths: startup (top-N) vs query-time (full pool scan)
 
 Not yet implemented:
-- Structured concept relationships between notes
 - Configurable context limits for prompt assembly
 
 ---
 
 ## Phase 3 — Concept Graph
 
-**Priority: Medium.** Highest long-term value, highest implementation cost.
-**Risk: High.** New file structures, new indexing, new query paths.
-**Depends on:** Phase 1 (metadata) and Phase 2 (selection) being stable.
+**Status: 3.1–3.3 complete (2026-03-08). 3.5 deferred pending 2+ weeks of use.**
 
 ### 3.5 Full directory structure — deferred
 - [ ] Only pursue if 3.1–3.4 prove tags insufficient after ≥2 weeks of use
@@ -41,13 +44,13 @@ Not yet implemented:
 ## Sequencing
 
 ```
-Phase 1 (Lifecycle)  ← 1.1–1.3 done; 1.4 prune next
+Phase 1 (Lifecycle)  ✓ complete
   ↓
-Phase 2 (Assembler)  ← needed before note pool exceeds ~30 notes
+Phase 2 (Assembler)  ✓ complete
   ↓
-Phase 3 (Graph)      ← start with tags (3.2), not directories (3.5)
+Phase 3 (Graph)      ✓ complete (3.1–3.3 + related-notes; 3.5 deferred)
   ↓
-Phase 4 (Docs)       ← continuous, ship with each phase
+Phase 4 (Docs)       ← current phase
 ```
 
 ---
