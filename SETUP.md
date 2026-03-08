@@ -142,11 +142,11 @@ Rules:
   Preserve all linked brain repo URLs on lines 2+.
 
 
-## PLAN.md
+## @brain (source)
 
 **INSTALL mode:**
-  If {SOURCE_ROOT}/PLAN.md does not exist:
-    Create {SOURCE_ROOT}/PLAN.md with this starter template:
+  If {SOURCE_ROOT}/@brain does not exist:
+    Create {SOURCE_ROOT}/@brain with this starter template:
 
 ````
 ████████████████████████████████████████████████████████████████████████████████
@@ -155,7 +155,7 @@ Rules:
     The line above divides the file: raw ideas go above it; AI-generated actionable todos go below it.
 
 **UPDATE mode:**
-  If {SOURCE_ROOT}/PLAN.md does not exist: create using the INSTALL template above.
+  If {SOURCE_ROOT}/@brain does not exist: create using the INSTALL template above.
   If it exists: do NOT modify — user content is preserved.
 
 
