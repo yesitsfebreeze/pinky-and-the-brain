@@ -61,15 +61,20 @@ CONTEXT_DEPTH:     2     # max concept-link hops during query expansion
 
 Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/SETUP.md
 
-## @resync
+## Resync
 
 If a project's p&b setup is broken or too far behind to self-update
 (e.g. missing update mechanism, corrupted skill, desynced branch),
-type `@resync` in the AI chat to force a full re-install from latest main.
+paste this into an AI chat to force a full re-install from latest main:
 
-This will:
-- Preserve all user content: `thoughts.md`, `changes.md`, `tree.md`, `sync.md`, `@pinky` linked repos
-- Overwrite everything else: skill, instructions, `@brain` structure
+```
+RESYNC = TRUE
+Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/SETUP.md
+
+This is a (re)install over the existing setup.
+Preserve all user content: thoughts.md, changes.md, tree.md, sync.md, @pinky linked repos.
+Overwrite everything else (skill, instructions, @brain structure).
+```
 
 ## Commands
 
@@ -80,7 +85,6 @@ This will:
 | "forget about..."          | Remove note, commit & push         |
 | "list brain contents"      | Show all brain repos + note counts |
 | `@commit`                  | Group changes by scope, create per-scope commits, push → triggers .patb indexing |
-| `@resync`                  | Force re-install from latest main — preserves user content, overwrites infrastructure |
 
 ## File Formats
 
