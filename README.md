@@ -12,7 +12,8 @@
 ~ At runtime: the skill fetches this file, extracts ! lines, executes them.  
 ~  
 ~ Architecture:  
-~  
+~
+```  
 ~   {source_root}        sync ─►    {brain_root}  
 ~   ┌ my-project/          │        ┌ ~/.patb/my-project.patb/  
 ~   ├── @pinky             │        ├── @brain  
@@ -21,7 +22,7 @@
 ~                          │        ├── tree.md  
 ~                          │        ├── changes.md  
 ~                          │        └── sync.md  
-  
+```
   
 ~ █ STEP 0: MODE  
   
@@ -39,6 +40,7 @@
 ~  
 ~ Users: fill in Current repo URL before pasting into a chat.  
   
+```
 @ Read this configuration table. If any required field still contains a  
 @ {placeholder}, stop and ask the user to fill it in before continuing.  
 @  
@@ -50,7 +52,8 @@
 @ | Min rating        | `30`                                                     |  
 @ | Avoid (optional)  |                                                          |  
 @ | Follow (optional) |                                                          |  
-  
+```
+
 ! Read configuration from {brain_root}/@brain:  
 !   - Parse `main-brain-origin-source-url` from the HTML comment  
 !   - Parse YAML: skill_hub_url, follow, avoid, max_notes, min_rating  
@@ -193,7 +196,8 @@
 ~ █ STEP 8: ALWAYS-ACTIVE INSTRUCTIONS  
 ~  
 ~ These make the AI auto-load memory at the start of every session.  
-  
+
+```  
 @ Detect the AI environment using the first matching indicator:  
 @  
 @ | Environment              | Detection                                            | Install path                                    | Format                         |  
@@ -204,6 +208,7 @@
 @ | Claude Code              | ~/.claude/ exists                                    | Append to ~/.claude/CLAUDE.md                   | No frontmatter                 |  
 @ | Cline / RooCode          | ~/.cline/ exists                                     | ~/.cline/rules/pb-memory.md                     | No frontmatter                 |  
 @ | Unknown                  | none matched                                         | ~/.agents/instructions/pb-memory.md             | No frontmatter; warn user      |  
+```
 @  
 @ Write to the detected path (adapt frontmatter to environment):  
 @  
