@@ -349,12 +349,12 @@ git -C {BRAIN_ROOT} push
        Report: "Pruned {N} notes. Pool now has {remaining} notes."
 
 
-### "@pinky" / "do the next todo"
+### "@process" / "do the next todo"
 
 TODO WORKFLOW:
   1. Open {SOURCE_ROOT}/@plan.
      If missing: inform user, offer to create it (see SETUP.md — @plan section).
-  2. Parse the separator marker (# ███ TODOS):
+  2. Parse the separator line (█████████████████████):
      - Content above the separator: raw ideas
      - Content below the separator: AI-generated actionable todos
   3. Select the next todo:
