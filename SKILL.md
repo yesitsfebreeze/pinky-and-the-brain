@@ -33,10 +33,12 @@ Read configuration from {BRAIN_ROOT}/@brain:
 
 ## Resolve Identity
 
-Determine source repo URL: `git remote get-url origin` (fallback to @pinky line 1)
+Determine source repo URL: `git remote get-url origin`
 Derive {SLUG}: last path segment → strip .git → lowercase → sanitize
-If PATB_URL is set (from @brain YAML): set BRAIN_REPO_URL = {PATB_URL}
-Otherwise: derive BRAIN_REPO_URL = {SOURCE_REPO_URL}.patb
+Determine BRAIN_REPO_URL (first match wins):
+  1. PATB_URL from @brain YAML (if already loaded)
+  2. @pinky line 1 (brain repo URL stored at source root)
+  3. Derive from source: {SOURCE_REPO_URL}.patb
 Set BRAIN_ROOT = ~/.patb/{SLUG}.patb/
 
 
@@ -90,9 +92,9 @@ MIN_RATING: {N}
 ## @pinky
 
 Read {SOURCE_ROOT}/@pinky:
-  Line 1: current repo URL
-  Lines 2+: linked .patb repo URLs
-If missing: create with URL from `git remote get-url origin` on line 1.
+  Line 1: this project's brain repo URL ({SLUG}.patb)
+  Lines 2+: linked brain repo URLs
+If missing: create with brain repo URL on line 1 (derived from `git remote get-url origin` + .patb suffix, or PATB_URL if set).
 
 
 ## Load Memory
@@ -175,6 +177,9 @@ REMEMBER:
      - New rating > lowest existing? → drop lowest
      - New rating < all existing? → inform user, don't store (unless they insist)
   5. Append or merge note with its rating
+     - Set `created` to today's date (or preserve original on merge)
+     - Set `last_used` to today's date
+     - Set `sources` to relevant repo-relative file paths (if applicable)
   6. Re-sort by rating (highest first)
   7. Commit and push:
 
@@ -243,9 +248,16 @@ Constraints (from @brain YAML, with defaults):
 Each note format:
 ```
 #### {short title}
-<!-- rating: {0–100} -->
+<!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} -->
+<!-- sources: {file1}, {file2} -->
 {body text}
 ```
+
+- `created`: date the note was first stored
+- `last_used`: date the note was last referenced in reasoning
+- `sources`: comma-separated repo-relative file paths the note relates to (omit line if none)
+
+Backward compatibility: notes missing `created` or `last_used` are treated as `created: unknown`, `last_used: unknown`. Notes missing `sources` have no source context.
 
 Pool is sorted by rating, highest first.
 When full: new note must outrank an existing one to enter.
@@ -271,14 +283,17 @@ No room + not better than worst → reject (inform user).
   ```
 
 {SOURCE_ROOT}/@pinky:
-  Line 1: source repo URL
-  Lines 2+: linked .patb URLs
+  Line 1: brain repo URL ({SLUG}.patb)
+  Lines 2+: linked brain repo URLs
 
 {BRAIN_ROOT}/thoughts.md:
   #### {TITLE}
-  <!-- rating: {0–100} -->
+  <!-- rating: {0–100} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} -->
+  <!-- sources: {file1}, {file2} -->
   {BODY}
   (sorted highest rating first)
+  (sources line omitted when no files are relevant)
+  (notes missing created/last_used fields: treat as unknown)
 
 {BRAIN_ROOT}/tree.md:
   | File | Access Rate (1–10) | Line Count | Impact (1–10) | Notes |
@@ -297,7 +312,7 @@ No room + not better than worst → reject (inform user).
 
 ## Failure Handling
 
-1. Invalid @pinky URL → report, ask for correction
+1. Invalid @pinky brain URL → report, ask for correction
 2. Clone/pull fails → report command + error, avoid partial writes
 3. Brain repo doesn't exist remotely → guide user to create {SLUG}.patb
 4. Path collision / illegal path → sanitize and log mapping
