@@ -352,9 +352,9 @@ git -C {BRAIN_ROOT} push
 ### "@pinky" / "do the next todo"
 
 TODO WORKFLOW:
-  1. Open {SOURCE_ROOT}/@brain.
-     If missing: inform user, offer to create it (see SETUP.md — @brain (source) section).
-  2. Parse the separator line (████…████):
+  1. Open {SOURCE_ROOT}/@plan.
+     If missing: inform user, offer to create it (see SETUP.md — @plan section).
+  2. Parse the separator marker (# ███ TODOS):
      - Content above the separator: raw ideas
      - Content below the separator: AI-generated actionable todos
   3. Select the next todo:
@@ -366,7 +366,7 @@ TODO WORKFLOW:
   4. Gather context: load relevant notes from thoughts.md, check tree.md for
      impacted files, read source files as needed.
   5. Implement the selected todo using available tools.
-  6. When done: delete the todo text from {SOURCE_ROOT}/@brain (below separator).
+  6. When done: delete the todo text from {SOURCE_ROOT}/@plan (below separator).
   7. Commit all changes to the source repo:
 
 ```
