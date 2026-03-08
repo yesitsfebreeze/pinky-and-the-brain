@@ -137,7 +137,7 @@ git -C {BRAIN_ROOT} commit -m "pb: prune {N} stale notes"
 git -C {BRAIN_ROOT} push
 ```
 
-Selection pass (run after prune pass — determines which notes enter the prompt):
+Selection pass — startup path (run after prune pass; applies only when no explicit user query is active):
   Decay and prune always operate on the FULL pool.
   Only a ranked subset is loaded into the session context.
   For each surviving note compute a relevance score:
@@ -150,6 +150,7 @@ Selection pass (run after prune pass — determines which notes enter the prompt
   Sort notes by relevance descending.
   Load the top MAX_CONTEXT_NOTES notes into session context (default: 8).
   Notes not selected are not loaded into the prompt but remain in the pool for future decay/prune.
+  For explicit topic queries, the full pool is used instead — see Commands → "what do you know about X".
 
 
 ## Catch-Up
@@ -210,15 +211,35 @@ For each selected linked repo:
 
 ## Commands
 
+### Context loading — two paths
+
+STARTUP PATH (session start, no active query):
+  Use the selection pass in Load Memory above.
+  General relevance ranking; capped at MAX_CONTEXT_NOTES.
+
+QUERY PATH (explicit "what do you know about X"):
+  Bypasses the MAX_CONTEXT_NOTES cap.
+  Searches and ranks the FULL surviving note pool (after decay + prune).
+  See command details below.
+
+---
+
 ### "what do you know about X"
 
-QUERY:
-  1. Read {BRAIN_ROOT}/@brain and thoughts.md
-  2. Search notes for the topic
-  3. For each linked .patb in @pinky:
-     Read @brain — skip if project not relevant to query
-     If relevant: sub-search that repo's thoughts.md
-  4. Present findings concisely — cite which brain repo each came from
+QUERY PATH — full-pool topic-filtered search (overrides startup selection cap):
+  1. Read {BRAIN_ROOT}/@brain and the FULL thoughts.md pool — do NOT apply MAX_CONTEXT_NOTES.
+  2. Score each note for topic relevance:
+       topic_score = 0
+       if note title or body matches X (substring / fuzzy): topic_score += 40
+       if note sources match files related to X:            topic_score += 20
+       combined = rating + topic_score
+  3. Sort by combined score descending.
+     Surface all notes with topic_score > 0; omit notes with zero topic match.
+     If no topic match found: fall back to startup-path ranking (top MAX_CONTEXT_NOTES by general relevance).
+  4. For each linked .patb in @pinky:
+     Read @brain — skip if project not relevant to query.
+     If relevant: sub-search that repo's FULL thoughts.md pool using the same topic scoring.
+  5. Present findings concisely — cite which brain repo each came from.
 
 ### "list brain contents"
 

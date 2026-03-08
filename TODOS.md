@@ -50,18 +50,6 @@ Not yet implemented:
 
 ---
 
-## Phase 2 — Context Assembler
-
-**Priority: High.** Critical before note pools exceed ~30 notes.
-**Risk: Medium.** Changes the core load path — must not break session startup.
-
-### 2.4 Query-time vs. startup-time paths
-- [ ] "what do you know about X": override ranking with topic-filtered search across full pool
-- [ ] Session startup (no query): use general ranking from 2.2
-- [ ] Document both paths in SKILL.md Commands section
-
----
-
 ## Phase 3 — Concept Graph
 
 **Priority: Medium.** Highest long-term value, highest implementation cost.
