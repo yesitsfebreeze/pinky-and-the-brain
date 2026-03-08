@@ -55,12 +55,6 @@ Not yet implemented:
 **Priority: High.** Critical before note pools exceed ~30 notes.
 **Risk: Medium.** Changes the core load path — must not break session startup.
 
-### 2.3 Ranked loading for cross-project context
-- [ ] Limit linked repos queried to `MAX_LINKED_REPOS`
-- [ ] Rank linked repos by: recency of changes.md + overlap with current session context
-- [ ] From each loaded repo: surface at most 3 notes (highest rated)
-- [ ] Update SKILL.md Cross-Project Context section
-
 ### 2.4 Query-time vs. startup-time paths
 - [ ] "what do you know about X": override ranking with topic-filtered search across full pool
 - [ ] Session startup (no query): use general ranking from 2.2

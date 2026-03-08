@@ -172,7 +172,9 @@ If source is newer than indexed:
 
 ## Cross-Project Context
 
-For each linked .patb URL in @pinky lines 2+:
+Collect all linked .patb URLs from @pinky lines 2+.
+
+For each linked repo (before ranking):
   Check for local clone at ~/.patb/{LINK_SLUG}.patb/
   If present: read @brain (title + description = project purpose)
   If not present: fetch @brain via raw URL:
@@ -184,9 +186,25 @@ Other:   use host's raw endpoint for {DEFAULT_BRANCH}
 ```
 
   Default branch detection: git symbolic-ref, or try main then master
+
+Rank linked repos by combined score (descending):
+  1. Recency score: based on date of most recent entry in changes.md
+       days_since = (today - last_changes_entry_date).days
+       recency_score = max(0, 30 - days_since)
+       If changes.md is missing or empty: recency_score = 0
+  2. Context overlap score: count of keywords shared between the repo's
+     @brain description + last 7 days of changes.md entries and current session context
+     (active file names, symbols, imports, user's topic)
+
+  combined_score = recency_score + context_overlap_score
+  Sort repos by combined_score descending.
+  Take the top MAX_LINKED_REPOS (default: 3). Discard the rest.
+
+For each selected linked repo:
   Read changes.md — surface entries from last 7 days or since last pull
   If project is relevant to current session: sub-search thoughts.md
   If not relevant: skip to next
+  Surface at most 3 notes from that repo (highest rated, after in-memory decay)
   Surface useful cross-project context and recent changes
 
 
