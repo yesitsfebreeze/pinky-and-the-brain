@@ -41,9 +41,6 @@ Not yet implemented:
 
 ## Phase 4 — Integration & Docs
 
-### 4.2 SETUP.md updates
-- [ ] UPDATE mode: migrate old note format → add missing fields with safe defaults
-
 ### 4.3 README.md updates
 - [ ] Document changed behavior for context loading
 - [ ] Add concept graph section once Phase 3 ships

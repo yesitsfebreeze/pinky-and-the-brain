@@ -222,6 +222,33 @@ INDEXED_AT: {NOW_ISO8601}
 ```
 
 
+## Migrate Notes
+
+**UPDATE mode only.** Runs after Memory Init, before Index Codebase.
+
+Read {BRAIN_ROOT}/thoughts.md and detect notes using the old format —
+i.e. the metadata comment is missing one or more of: `created`, `last_used`.
+
+Pattern for old-format notes:
+  `<!-- rating: {N} -->` (no `created` or `last_used` fields present)
+
+For each old-format note:
+  1. Determine a fallback date:
+       Run: `git -C {SOURCE_ROOT} log --follow --diff-filter=A --format=%cs -- thoughts.md | head -1`
+       If output is empty or command fails: use today's date (ISO 8601: YYYY-MM-DD)
+       This date is used as both `created` and `last_used`.
+  2. Rewrite the metadata comment in-place:
+       Old: `<!-- rating: {N} -->`
+       New: `<!-- rating: {N} | created: {DATE} | last_used: {DATE} -->`
+       Preserve `concepts` field if it already exists; omit if not present (tag organically later).
+  3. Do NOT add a `<!-- sources: ... -->` line unless sources were already present in the note.
+  4. Do NOT alter the note title or body.
+
+If no old-format notes are found: skip silently.
+If any notes were migrated: log the count in changes.md:
+  `#### {TODAY} — migrated {N} note(s) to current format`
+
+
 ## Index Codebase
 
 Scan the source repository and populate/update the brain:
