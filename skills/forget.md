@@ -14,6 +14,11 @@ Sync: `git -C {BRAIN_ROOT} pull --rebase`
 
 ## Execute: @forget
 
+MCP FAST PATH (preferred when available):
+  If `mcp_patb_forget` tool is available:
+    Call: `mcp_patb_forget(query)`
+    Done — skip the manual steps below.
+
 FORGET:
   1. Search {BRAIN_ROOT}/thoughts.md for matching notes
   2. Show matches, ask for confirmation

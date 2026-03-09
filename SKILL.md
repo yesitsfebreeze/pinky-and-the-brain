@@ -95,6 +95,7 @@ If any memory file is missing (first sync / register):
   Write sync.md with current source head
 
 Prune pass (run after load):
+  MCP FAST PATH: If `mcp_patb_prune` tool is available: call `mcp_patb_prune()` and skip the manual steps below.
   Collect all notes where `rating < PRUNE_THRESHOLD` (PRUNE_THRESHOLD from @brain YAML, default MIN_RATING)
   If any exist:
     Remove those notes from thoughts.md
@@ -223,6 +224,10 @@ QUERY PATH (explicit "what do you know about X"):
 ---
 
 ### "what do you know about X"
+
+MCP FAST PATH: If `mcp_patb_query` tool is available:
+  Call: `mcp_patb_query(X, CONTEXT_DEPTH)`
+  Present the returned notes concisely; cite which brain repo each came from. Done — skip the manual steps below.
 
 QUERY PATH — full-pool concept-aware topic search:
   1. Read {BRAIN_ROOT}/@brain, the FULL thoughts.md pool, and concepts.md.

@@ -15,6 +15,11 @@ Read {BRAIN_ROOT}/@brain for YAML config (PRUNE_THRESHOLD, MIN_RATING, etc.)
 
 ## Execute: @prune
 
+MCP FAST PATH (preferred when available):
+  If `mcp_patb_prune` tool is available:
+    Call: `mcp_patb_prune(threshold?)`
+    Done — skip the manual steps below.
+
 PRUNE:
   1. Load the full note pool from {BRAIN_ROOT}/thoughts.md
   2. Identify all notes where `rating < PRUNE_THRESHOLD`

@@ -15,6 +15,11 @@ Read {BRAIN_ROOT}/@brain for YAML config (MIN_RATING, MAX_NOTES, etc.)
 
 ## Execute: @remember
 
+MCP FAST PATH (preferred when available):
+  If `mcp_patb_remember` tool is available:
+    Call: `mcp_patb_remember(text, concepts?, sources?, rating?)`
+    Done — skip the manual steps below.
+
 REMEMBER:
   1. Open {BRAIN_ROOT}/thoughts.md
   2. Rate new note 0–1000 based on usefulness
