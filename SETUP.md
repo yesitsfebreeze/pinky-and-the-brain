@@ -69,6 +69,185 @@ FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-th
 ````
 
 
+## Command Skills Bootstrap
+
+For each command below:
+  Create directory ~/.agents/skills/{skill-name}/ if it doesn't exist.
+  Write the following content verbatim to ~/.agents/skills/{skill-name}/SKILL.md (overwrite if it exists).
+
+---
+
+**remember** → ~/.agents/skills/remember/SKILL.md:
+````
+---
+name: remember
+description: >
+  Store a new note in the p&b brain repo for the current project.
+  Use when the user says "@remember" or "remember that...".
+argument-hint: 'The thing to remember, e.g. "we use snake_case for all DB column names"'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/remember.md
+````
+
+---
+
+**forget** → ~/.agents/skills/forget/SKILL.md:
+````
+---
+name: forget
+description: >
+  Remove a note from the p&b brain repo for the current project.
+  Use when the user says "@forget" or "forget about...".
+argument-hint: 'The note to remove, e.g. "the snake_case convention"'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/forget.md
+````
+
+---
+
+**brain** → ~/.agents/skills/brain/SKILL.md:
+````
+---
+name: brain
+description: >
+  List all p&b brain repos with note counts, or show all notes for a specific brain repo slug.
+  Use when the user says "@brain" or "list brain contents".
+argument-hint: 'Optional: brain repo slug to inspect (e.g. "my-project")'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/brain.md
+````
+
+---
+
+**prune** → ~/.agents/skills/prune/SKILL.md:
+````
+---
+name: prune
+description: >
+  Remove all notes below the rating threshold (PRUNE_THRESHOLD) from the current
+  project's brain repo. Use when the user says "@prune".
+argument-hint: 'No argument needed'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/prune.md
+````
+
+---
+
+**commit** → ~/.agents/skills/commit/SKILL.md:
+````
+---
+name: commit
+description: >
+  Group all uncommitted source changes by scope, create per-scope commits, push,
+  and trigger p&b brain indexing. Use when the user says "@commit".
+argument-hint: 'No argument needed'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/commit.md
+````
+
+---
+
+**plan** → ~/.agents/skills/plan/SKILL.md:
+````
+---
+name: plan
+description: >
+  Enter p&b plan mode. Each subsequent message is silently captured as a plan
+  fragment into @plan above the separator. Use when the user says "@plan".
+argument-hint: 'No argument needed'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/plan.md
+````
+
+---
+
+**play** → ~/.agents/skills/play/SKILL.md:
+````
+---
+name: play
+description: >
+  Exit plan mode and implement the most impactful next todo from @plan. Gathers
+  context from brain notes, solves it, deletes the todo, and commits. Use when
+  the user says "@play".
+argument-hint: 'No argument needed'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/play.md
+````
+
+---
+
+**exit** → ~/.agents/skills/exit/SKILL.md:
+````
+---
+name: exit
+description: >
+  Exit plan mode or play mode and return to normal conversation. Use when the user
+  says "@exit".
+argument-hint: 'No argument needed'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/exit.md
+````
+
+---
+
+**resync** → ~/.agents/skills/resync/SKILL.md:
+````
+---
+name: resync
+description: >
+  Re-install p&b from latest main, preserving all user notes and linked repos.
+  Use when the user says "@resync" or when the setup appears broken.
+argument-hint: 'No argument needed'
+user-invocable: true
+disable-model-invocation: false
+---
+
+SKILL_MODE = TRUE
+
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/resync.md
+````
+
+
 ## Brain Repo
 
 Ensure ~/.patb/ directory exists.
@@ -310,11 +489,13 @@ Fetch the current version files from remote:
 ```
 https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/install.version
 https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skill.version
+https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/context.version
 ```
 
 Write their contents to:
   {BRAIN_ROOT}/install.version
   ~/.agents/skills/patb/skill.version
+  ~/.agents/skills/patb/context.version
 
 These are compared during session start to detect when an update is available.
 

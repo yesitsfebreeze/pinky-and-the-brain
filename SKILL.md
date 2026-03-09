@@ -6,11 +6,13 @@ Fetch the remote version files:
 ```
 https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/install.version
 https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skill.version
+https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/context.version
 ```
 
 Compare line 2 (timestamp) of each against the local copies:
   {BRAIN_ROOT}/install.version
   ~/.agents/skills/patb/skill.version
+  ~/.agents/skills/patb/context.version
 
 If either local file is missing: treat as outdated.
 If any remote timestamp is newer than local:
@@ -21,25 +23,11 @@ If any remote timestamp is newer than local:
 If versions match: continue with normal session lifecycle.
 
 
-## Configuration
+## Load Context
 
-Read configuration from {BRAIN_ROOT}/@brain:
-  - Parse `main-brain-origin-source-url` from the HTML comment
-  - Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, PRUNE_THRESHOLD, MAX_CONTEXT_NOTES, MAX_CONTEXT_FILES, MAX_LINKED_REPOS, CONTEXT_DEPTH
-  - If PATB_URL is set: override BRAIN_REPO_URL with its value
-  - Apply FOLLOW/AVOID as session constraints
-  - Defaults if missing: MAX_NOTES=64, MIN_RATING=300, PRUNE_THRESHOLD=MIN_RATING, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2
+FETCH and READ: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/CONTEXT.md
 
-
-## Resolve Identity
-
-Determine source repo URL: `git remote get-url origin`
-Derive {SLUG}: last path segment → strip .git → lowercase → sanitize
-Determine BRAIN_REPO_URL (first match wins):
-  1. PATB_URL from @brain YAML (if already loaded)
-  2. @pinky line 1 (brain repo URL stored at source root)
-  3. Derive from source: {SOURCE_REPO_URL}.patb
-Set BRAIN_ROOT = ~/.patb/{SLUG}.patb/
+Resolve identity and set {SLUG}, BRAIN_ROOT, SOURCE_ROOT per CONTEXT.md.
 
 
 ## Sync Brain Repo
@@ -62,10 +50,9 @@ If working inside a .patb repo directly: use cwd as brain root, skip clone/pull
 
 Read {BRAIN_ROOT}/@brain:
   Parse `main-brain-origin-source-url` from the HTML comment
-  Parse YAML: SKILL_URL, PATB_URL, FOLLOW, AVOID, MAX_NOTES, MIN_RATING, PRUNE_THRESHOLD, MAX_CONTEXT_NOTES, MAX_CONTEXT_FILES, MAX_LINKED_REPOS, CONTEXT_DEPTH
+  Parse YAML per CONTEXT.md (variables and defaults)
   If PATB_URL is set: override BRAIN_REPO_URL with its value
   Apply FOLLOW/AVOID as session constraints
-  Defaults: MAX_NOTES=64, MIN_RATING=300, PRUNE_THRESHOLD=MIN_RATING, MAX_CONTEXT_NOTES=8, MAX_CONTEXT_FILES=5, MAX_LINKED_REPOS=3, CONTEXT_DEPTH=2
 
 If @brain is missing or invalid (empty, no origin comment, no YAML):
   Create/repair using canonical format:
@@ -138,11 +125,7 @@ git -C {BRAIN_ROOT} push
 Selection pass — startup path (run after prune pass; applies only when no explicit user query is active):
   Prune always operates on the FULL pool.
   Only a ranked subset is loaded into the session context.
-  Relevance formula — used for both context selection and pool eviction:
-    relevance(note) =
-      rating
-      + recency_bonus: +20 if last_used ≤ 3 days ago, +10 if ≤ 7 days; 0 otherwise (unknown last_used = 0)
-      + repo_match_bonus: +15 if any of note's sources exist as files under {SOURCE_ROOT}
+  Relevance formula per CONTEXT.md — used for both context selection and pool eviction.
   Sort notes by relevance descending.
   Load the top MAX_CONTEXT_NOTES notes into session context (default: 8).
   Notes not selected are not loaded into the prompt but remain in the pool for future prune.
@@ -169,7 +152,7 @@ Read indexed hash/timestamp from {BRAIN_ROOT}/sync.md (create if missing)
 If source is newer than indexed:
   Index all commits since indexed hash into thoughts.md, tree.md, changes.md
   Auto-tag each new note with 1–3 concept tags; add `concepts` field to its metadata comment
-  Rebuild concepts.md from all concept tags in thoughts.md (see File Formats)
+  Rebuild concepts.md from all concept tags in thoughts.md
   Update sync.md with new hash + timestamp
   Commit and push brain immediately
 
@@ -234,6 +217,12 @@ Context size limits (sourced from @brain YAML; enforce silently by truncating lo
 
 ## Commands
 
+Each command below can also be invoked as a dedicated `/` skill (e.g. `/remember`,
+`/forget`, `/brain`, `/prune`, `/commit`, `/plan`, `/play`,
+`/exit`, `/resync`). These individual skill files are installed by SETUP.md
+under `~/.agents/skills/{cmd}/` and delegate to `skills/{cmd}.md` in this repo.
+
+
 ### Context loading — two paths
 
 STARTUP PATH (session start, no active query):
@@ -285,215 +274,44 @@ QUERY PATH — full-pool concept-aware topic search:
 
 ### "@brain"
 
-LIST:
-  1. List all *.patb/ directories under ~/.patb/
-  2. For each: read @brain + thoughts.md → show name, purpose, note count
-  3. If specific slug given: show all notes with ratings
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/brain.md
 
 ### "@remember <that...>"
 
-REMEMBER:
-  1. Open {BRAIN_ROOT}/thoughts.md
-  2. Rate new note 0–1000 based on usefulness
-  3. If below MIN_RATING: inform user, don't store (unless they insist)
-  4. If pool is at MAX_NOTES:
-     - Similar note exists? → replace it (merge text, keep higher rating)
-     - Compute relevance() for all pool notes and the new note (see Load Memory → Selection pass)
-     - New note relevance > lowest existing relevance? → evict that note, insert new
-     - New note relevance ≤ all existing → inform user, don't store (unless they insist)
-  5. Append or merge note with its rating
-     - Set `created` to today's date (or preserve original on merge)
-     - Set `last_used` to today's date
-     - Set `sources` to relevant repo-relative file paths (if applicable)
-     - Auto-suggest 1–3 concept tags reflecting the note's topic; add `concepts` field to the metadata comment if any apply
-     - Scan pool for notes sharing ≥1 concept tag with the new note; suggest at most 3 as `related-notes` candidates; add `related-notes` field if user accepts (omit field if none proposed or declined)
-  6. Re-sort by rating (highest first)
-  7. Commit and push:
-
-```
-git -C {BRAIN_ROOT} pull --rebase
-git -C {BRAIN_ROOT} add -A
-git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: remember - {SUMMARY}"
-git -C {BRAIN_ROOT} push
-```
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/remember.md
 
 ### "@forget <about...>"
 
-FORGET:
-  1. Search {BRAIN_ROOT}/thoughts.md for matching notes
-  2. Show matches, ask for confirmation
-  3. Remove confirmed notes
-  4. Re-sort by rating (highest first)
-  5. Commit and push:
-
-```
-git -C {BRAIN_ROOT} pull --rebase
-git -C {BRAIN_ROOT} add -A
-git -C {BRAIN_ROOT} diff --cached --quiet || git -C {BRAIN_ROOT} commit -m "pb: forget - {SUMMARY}"
-git -C {BRAIN_ROOT} push
-```
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/forget.md
 
 ### "@prune"
 
-PRUNE:
-  1. Load the full note pool from {BRAIN_ROOT}/thoughts.md
-  2. Identify all notes where `rating < PRUNE_THRESHOLD`
-  3. If none: report "Pool is clean — no notes below threshold (PRUNE_THRESHOLD={N}). {count} notes remain."
-  4. If any exist:
-     List notes to be removed (title + rating each), ask for confirmation
-     If confirmed:
-       Remove pruned notes from thoughts.md
-       Re-sort remaining notes by rating (highest first)
-       Append to {BRAIN_ROOT}/changes.md: `#### {DATE} — pruned {N} stale notes (manual)`
-       Commit and push:
-
-```
-git -C {BRAIN_ROOT} pull --rebase
-git -C {BRAIN_ROOT} add -A
-git -C {BRAIN_ROOT} commit -m "pb: prune {N} stale notes"
-git -C {BRAIN_ROOT} push
-```
-
-       Report: "Pruned {N} notes. Pool now has {remaining} notes."
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/prune.md
 
 
 ### "@play"
 
-TODO WORKFLOW:
-  1. Open {SOURCE_ROOT}/@plan.
-     If missing: inform user, offer to create it (see SETUP.md — @plan section).
-     WRITE STATUS play → update {SOURCE_ROOT}/@pinky.
-  2. Parse the separator line (█████████████████████):
-     - Content above the separator: raw ideas
-     - Content below the separator: AI-generated actionable todos
-  3. Select the next todo:
-     - If AI-generated todos exist (below separator): pick the most impactful one
-       based on current session context and brain notes.
-     - If no AI-generated todos exist: look at raw ideas (above separator),
-       select the most actionable, convert it to a todo and append below the separator,
-       then proceed to implement it.
-  4. Gather context: load relevant notes from thoughts.md, check tree.md for
-     impacted files, read source files as needed.
-  5. Implement the selected todo using available tools.
-  6. When done: delete the todo text from {SOURCE_ROOT}/@plan (below separator).
-  7. Commit all changes to the source repo:
-
-```
-git -C {SOURCE_ROOT} add -A
-git -C {SOURCE_ROOT} diff --cached --quiet || git -C {SOURCE_ROOT} commit -m "{SUMMARY}"
-```
-
-  8. When no todos remain (above or below separator): CLEAR STATUS → update {SOURCE_ROOT}/@pinky.
-  9. Report what was done and what the next todo would be.
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/play.md
 
 
 ### "@plan" / "@exit"
 
-PLAN MODE ENTRY (`@plan`):
-  1. Enter plan mode — set internal flag PLAN_MODE = TRUE.
-  2. WRITE STATUS plan → update {SOURCE_ROOT}/@pinky.
-  3. Acknowledge with a single word meaning "okay / understood / got it"
-     chosen at random from a broad set of human languages (e.g. "Hai", "D'accord",
-     "Entendido", "Certo", "Gut", "Dobro", "Dobré", "Хорошо", "好的", "نعم", etc.).
-     Use a different language each time. No other output.
-
-WHILE IN PLAN MODE (every subsequent user message):
-  1. Read the message silently — do NOT produce a conversational reply.
-  2. Assess whether the message contains something actionable (an idea, intent,
-     constraint, feature request, question to resolve, or decision).
-     - If YES — actionable content detected:
-       a. Open {SOURCE_ROOT}/@plan.
-          If missing: create it with the standard separator on its own line:
-          `█████████████████████`
-       b. Synthesise a concise plan fragment from the new information.
-          Write or refine content ABOVE the separator line.
-          Merge with any existing above-separator content if related; add a new
-          paragraph or bullet if unrelated/additive.
-       c. Save the file.
-       d. Respond with a single acknowledgement word (same rule as entry — random
-          language, one word only). No explanation, no summary.
-     - If NO — nothing actionable (chit-chat, filler, simple question, etc.):
-       Do NOT respond at all, OR respond with a single acknowledgement word
-       (50 / 50 chance). Nothing else.
-  3. Continue planning. Each new message may refine, extend, or supersede
-     the plan text already written above the separator.
-
-PLAN MODE EXIT — triggered by `@play` or `@exit`:
-  1. Clear PLAN_MODE flag.
-  2. CLEAR STATUS → update {SOURCE_ROOT}/@pinky.
-  3. If invoked via `@exit`:
-     - Resume normal conversational mode. No immediate action.
-     - Briefly confirm exit: "Back. Here's what I captured:" followed by the
-       current above-separator content of @plan (verbatim, no edits).
-  4. If invoked via `@play`:
-     - Exit plan mode silently.
-     - Immediately run the full `@play` workflow (see ### "@play") using the
-       plans and ideas that were accumulated above the separator.
-     - The above-separator content now serves as the raw-ideas input for @play
-       step 3 — convert to actionable todos, pick the most impactful, execute.
-
-EDGE CASES:
-  - If `@plan` is called when already in plan mode: re-acknowledge with a
-    single word, remain in plan mode, no other effect.
-  - If `@play` is called with no above-separator content and no below-separator
-    todos: inform the user and ask what to work on.
-  - @plan separator line is always exactly: `█████████████████████`
-    Preserve it verbatim; never move or duplicate it.
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/plan.md
 
 
 ### "@exit"
 
-EXIT WORKFLOW:
-  1. Clear PLAN_MODE flag (if set).
-  2. Clear PLAY_MODE flag (if set).
-  3. CLEAR STATUS → update {SOURCE_ROOT}/@pinky.
-  4. If any mode was active:
-     - Resume normal conversational mode.
-     - If PLAN_MODE was active: confirm exit with "Back. Here's what I captured:"
-       followed by the current above-separator content of @plan (verbatim, no edits).
-     - If PLAY_MODE was active: confirm abort with a one-line summary of any
-       work completed before the exit.
-  5. If no mode was active: acknowledge with a single word and resume normal mode.
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/exit.md
 
 
 ### "@resync"
 
-RESYNC WORKFLOW:
-  1. Inform the user: "Running @resync — re-installing p&b from latest main. Your notes and linked repos will be preserved."
-  2. Set RESYNC = TRUE internally.
-  3. Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/SETUP.md
-     (This runs in UPDATE mode, preserving all user content and overwriting infrastructure.)
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/resync.md
 
 
 ### "@commit"
 
-COMMIT WORKFLOW:
-  1. Review all uncommitted changes in {SOURCE_ROOT}:
-```
-git -C {SOURCE_ROOT} status --short
-git -C {SOURCE_ROOT} diff
-```
-  2. If nothing staged and nothing modified: report "Nothing to commit."
-  3. Group changes by logical scope:
-     - Analyse which files belong to the same feature, fix, refactor, or concern.
-     - Create one commit per group, not one mega-commit for everything.
-     - Typical groupings: feature changes together, config/tooling separately,
-       docs separately, unrelated fixes as their own commits.
-  4. For each group in order (most foundational first):
-     a. Stage only its files:
-```
-git -C {SOURCE_ROOT} add {file1} {file2} ...
-```
-     b. Write a concise conventional commit message scoped to that group.
-     c. Commit:
-```
-git -C {SOURCE_ROOT} commit -m "{scope}: {message}"
-```
-  5. Push all commits at once:
-```
-git -C {SOURCE_ROOT} push
-```
-  6. Run the full Post-Push indexing loop (see ## Post-Push).
+FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skills/commit.md
 
 
 ## After Reasoning
@@ -501,16 +319,10 @@ git -C {SOURCE_ROOT} push
 Mandatory — run after answering a user query that loaded notes from thoughts.md:
 
   1. Scan which notes from the loaded pool were actually referenced in reasoning
-  2. Apply score adjustments:
-     - Notes used in the response: +300
-     - Notes confirmed by code during the response: +500
-     - Notes loaded but never referenced: -100
-     - Notes contradicted by code or user: -800
-  3. Clamp all adjusted ratings to 0–1000
-  4. Remove notes that dropped below MIN_RATING
-  5. Update `last_used` to today's date for all notes that received a positive adjustment
-  6. Re-sort thoughts.md by rating (highest first)
-  7. Commit adjusted ratings:
+  2. Apply score adjustments per CONTEXT.md.
+  3. Clamp to 0–1000; remove notes below MIN_RATING; update `last_used` for notes with positive adjustments.
+  4. Re-sort thoughts.md by rating (highest first)
+  5. Commit adjusted ratings:
 
 ```
 git -C {BRAIN_ROOT} pull --rebase
@@ -539,7 +351,7 @@ git -C {BRAIN_ROOT} fetch origin --prune
      Auto-tag each new note with 1–3 concept tags; add `concepts` field to its metadata comment
      Refresh @brain description and tree.md from current source state
      Append cross-project-relevant changes to changes.md (cap 20, newest first)
-     Rebuild concepts.md from all concept tags in thoughts.md (see File Formats)
+     Rebuild concepts.md from all concept tags in thoughts.md
   6. Update {BRAIN_ROOT}/sync.md:
 ```
 SOURCE_BRANCH: {MAIN|MASTER}
@@ -556,108 +368,12 @@ git -C {BRAIN_ROOT} push
 
 ## Note Pool Rules
 
-Constraints (from @brain YAML, with defaults):
-  MAX_NOTES: 64 — hard cap on pool size
-  MIN_RATING: 300 — floor, never store below this
+Note format, score adjustments, relevance formula, and config defaults per CONTEXT.md.
 
-Each note format:
-```
-#### {short title}
-<!-- rating: {0–1000} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
-<!-- sources: {file1}, {file2} -->
-{body text}
-```
-
-- `created`: date the note was first stored
-- `last_used`: date the note was last referenced in reasoning
-- `sources`: comma-separated repo-relative file paths the note relates to (omit line if none)
-- `concepts`: comma-separated concept tags reflecting the note's topic (omit field if none)
-- `related-notes`: comma-separated short titles of directly related notes in this pool (omit field if none)
-
-Backward compatibility: notes missing `created` or `last_used` are treated as `created: unknown`, `last_used: unknown`. Notes missing `sources` have no source context. Notes missing `concepts` have no tags and work normally. Notes missing `related-notes` have no direct note links and work normally.
-
-Pool is sorted by rating, highest first.
-When full: compute relevance() for all pool notes and the new note (see Load Memory → Selection pass).
+When pool reaches MAX_NOTES:
   Similar note exists? → merge & replace (keep higher rating of the two).
   New note relevance > lowest existing relevance? → evict that note, insert new.
   New note relevance ≤ all existing → reject (inform user).
 
-Score adjustments — apply these rating changes when the event occurs:
-  `used in reasoning` → +300 (note was referenced to answer a query)
-  `confirmed by code` → +500 (note's claim was verified against actual code)
-  `unused recall` → -100 (note was loaded into context but never referenced)
-  `contradicted by code or user` → -800 (note's content was proven wrong)
-Adjusted ratings are clamped to 0–1000. Notes that drop below MIN_RATING are removed.
-
-Backward compatibility: notes with ratings in the old 0–100 scale (detected when rating ≤ 100 and the note was created before the 0–1000 upgrade) should be multiplied by 10 on first load.
 
 
-## File Formats
-
-````
-{BRAIN_ROOT}/@brain:
-  <!-- main-brain-origin-source-url: {URL} -->
-  # {TITLE}
-  {DESCRIPTION}
-  ```yaml
-  SKILL_URL: {URL}
-  FOLLOW:
-    - {CONSTRAINT}
-  AVOID:
-    - {CONSTRAINT}
-  MAX_NOTES: {N}
-  MIN_RATING: {N}
-  PRUNE_THRESHOLD: {N}
-  ```
-
-{SOURCE_ROOT}/@pinky:
-  Line 1: brain repo URL ({SLUG}.patb)
-  Lines 2+: linked brain repo URLs
-
-{BRAIN_ROOT}/thoughts.md:
-  #### {TITLE}
-  <!-- rating: {0–1000} | created: {YYYY-MM-DD} | last_used: {YYYY-MM-DD} | concepts: {tag1}, {tag2} | related-notes: {title1}, {title2} -->
-  <!-- sources: {file1}, {file2} -->
-  {BODY}
-  (sorted highest rating first)
-  (sources line omitted when no files are relevant)
-  (concepts field omitted when no tags apply)
-  (related-notes field omitted when no direct note links exist)
-  (notes missing created/last_used fields: treat as unknown)
-  (notes missing concepts field: no tags, work normally)
-  (notes missing related-notes field: no direct links, work normally)
-
-{BRAIN_ROOT}/tree.md:
-  | File | Access Rate (1–10) | Line Count | Impact (1–10) | Notes |
-
-{BRAIN_ROOT}/changes.md:
-  #### {YYYY-MM-DD} — {TITLE}
-  {1–2 sentence body}
-  (newest first, cap 20)
-
-{BRAIN_ROOT}/sync.md:
-  SOURCE_BRANCH: {MAIN|MASTER}
-  SOURCE_HEAD: {HASH}
-  INDEXED_AT: {ISO-8601}
-
-{BRAIN_ROOT}/concepts.md (auto-generated, never manually edited):
-  #### {concept-tag}
-  <!-- related: {tag1}, {tag2}, {tag3} -->
-  <!-- files: {file1}, {file2} -->
-  <!-- repos: {slug1} -->
-  (sorted alphabetically by concept tag)
-  (related: co-occurring tags — appear together on the same note)
-  (files: union of sources across all notes that carry this tag)
-  (repos: brain slugs where this tag appears; omit line if only current repo)
-````
-
-
-## Failure Handling
-
-1. Invalid @pinky brain URL → report, ask for correction
-2. Clone/pull fails → report command + error, avoid partial writes
-3. Brain repo doesn't exist remotely → guide user to create {SLUG}.patb
-4. Path collision / illegal path → sanitize and log mapping
-5. Push fails → leave local commit, report, continue
-6. Merge conflict on pull --rebase → git rebase --abort, report, leave staged
-7. sync.md missing/corrupt → rebuild from current source head, full re-index
