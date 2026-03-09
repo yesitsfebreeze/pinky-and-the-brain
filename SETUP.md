@@ -150,14 +150,7 @@ Rules:
     Create {SOURCE_ROOT}/@plan with this starter template:
 
 ````
-// write whar you want to do here
-// then write 
-
 █████████████████████
-
-
-Index the codebase, and update the .patb repository
-
 ````
 
     The line above divides the file: raw ideas go above it; AI-generated actionable todos go below it.
