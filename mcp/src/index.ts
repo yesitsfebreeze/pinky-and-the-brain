@@ -52,7 +52,7 @@ function errorContext(): string {
 }
 
 const server = new Server(
-	{ name: 'patb', version: '1.0.0' },
+	{ name: 'patb', version: 'git' },
 	{
 		capabilities: {
 			tools: {},

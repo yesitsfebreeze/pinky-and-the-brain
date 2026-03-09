@@ -68,7 +68,7 @@ Replace AI-instruction-based memory writes with a typed MCP server. The skill/RE
 - [x] Add `npm install && npm run build` step to install flow; update mcp/README.md Setup section
 
 ### 5.5 Keep self-referencing update method intact
-- [x] SKILL.md version check + @resync flow: unchanged — README paste still works as bootstrap
+- [x] SKILL.md git sync check + @resync flow: unchanged — README paste still works as bootstrap
 - [x] After MCP install: update SKILL.md to call MCP tools (remember/forget/etc.) instead of writing markdown directly, while keeping markdown-direct as fallback when MCP is unavailable
 - [x] `@resync` rebuilds skill AND re-runs `npm install && npm run build` in `mcp/` if present
 

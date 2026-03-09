@@ -1,7 +1,7 @@
 # Pinky & The Brain — Install or Update
 
 This file handles both fresh installs and updates in a single flow.
-Fetched and executed by the README, by the skill version check,
+Fetched and executed by the README, by the skill git sync check,
 or manually via the `@resync` command.
 Configuration variables come from the README's configuration table (fresh install)
 or from the existing @brain file (update / @resync).
@@ -292,7 +292,7 @@ Resolve {HOME}:
 MCP install path: `{HOME}/.agents/skills/patb/mcp/`
 
 Check Node.js is available:
-  Run: `node --version`
+  Run: `node -e "process.exit(0)"`
   If not found: warn — "p&b MCP server requires Node.js ≥18. Install from https://nodejs.org then run @resync to activate the MCP server." — set MCP_BUILD_FAILED = TRUE and skip ahead to **Brain Repo**.
 
 Download MCP source (adapt paths for OS):
@@ -686,5 +686,5 @@ If `node` / `npm` are not available: skip this section silently.
 Delete this installer file from disk (if it was written as a temp file).
 If content was pasted as a chat message (no backing file): skip this step.
 If `@resync` was invoked: inform user "@resync complete — p&b re-installed from latest main."
-If UPDATE mode: inform user "Updated to {NEW_VERSION}. Changed: {LIST_OF_UPDATED_ARTIFACTS}."
+If UPDATE mode: inform user "Updated from git latest main. Changed: {LIST_OF_UPDATED_ARTIFACTS}."
 If INSTALL mode: inform user "Installation complete."
