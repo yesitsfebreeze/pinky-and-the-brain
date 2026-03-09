@@ -12,6 +12,7 @@ import { migrateNotePool } from '../lib/note.js';
 import simpleGit from 'simple-git';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 
 export interface SyncResult {
 	pulled: boolean;
@@ -22,6 +23,13 @@ export interface SyncResult {
 }
 
 const GLOBAL_INDEX_URL = 'https://github.com/yesitsfebreeze/pinky-and-the-brain.patb';
+
+function getGlobalIndexRoots(): { preferred: string; legacy: string } {
+	return {
+		preferred: path.join(os.homedir(), '.patb', '@brain'),
+		legacy: brainRootFromUrl(GLOBAL_INDEX_URL),
+	};
+}
 
 function getSourceRepoUrl(brainRoot: string): string {
 	const brainPath = path.join(brainRoot, '@brain');
@@ -69,7 +77,12 @@ async function updateGlobalRepoCatalog(config: PatbConfig): Promise<boolean> {
 	const sourceRepoUrl = getSourceRepoUrl(config.brainRoot);
 	if (!sourceRepoUrl) return false;
 
-	const globalRoot = brainRootFromUrl(GLOBAL_INDEX_URL);
+	const roots = getGlobalIndexRoots();
+	const preferredGitDir = path.join(roots.preferred, '.git');
+	const legacyGitDir = path.join(roots.legacy, '.git');
+	const globalRoot = fs.existsSync(preferredGitDir)
+		? roots.preferred
+		: (fs.existsSync(legacyGitDir) ? roots.legacy : roots.preferred);
 	const globalGitDir = path.join(globalRoot, '.git');
 
 	if (!fs.existsSync(globalGitDir)) {
