@@ -34,7 +34,49 @@ Phase 2 (Assembler)  ✓ complete
 Phase 3 (Graph)      ✓ complete (3.1–3.4 + related-notes; 3.5 deferred)
   ↓
 Phase 4 (Docs)       ✓ complete
+  ↓
+Phase 5 (MCP)        [ ] in progress
 ```
+
+---
+
+## Phase 5 — MCP Server
+
+Replace AI-instruction-based memory writes with a typed MCP server. The skill/README install method remains the primary bootstrap; MCP becomes the runtime layer once installed.
+
+### 5.1 Core lib layer
+- [x] `mcp/src/lib/note.ts` — Note type + parse/serialize (rating, created, last_used, concepts, sources, body)
+- [x] `mcp/src/lib/storage.ts` — Read/write thoughts.md, tree.md, changes.md, @plan (atomic file writes)
+- [x] `mcp/src/lib/git.ts` — pull --rebase, add -A, commit, push via simple-git
+- [x] `mcp/src/config.ts` — Parse @brain YAML config, resolve BRAIN_ROOT from @pinky line 1
+
+### 5.2 MCP tools
+- [ ] `remember` — validate + rate note, insert into thoughts.md sorted by rating, commit & push
+- [ ] `forget` — fuzzy search pool, confirm match list, remove entries, commit & push
+- [ ] `query` — return top-N notes by relevance formula (rating + recency + repo-match), with concept expansion up to CONTEXT_DEPTH hops
+- [ ] `prune` — remove all notes below PRUNE_THRESHOLD, log deletions to changes.md, commit & push
+- [ ] `sync` — pull brain repo, rebase, push; report diff
+- [ ] `plan_add` / `plan_next` / `plan_complete` — manage todos in @plan below the separator
+
+### 5.3 MCP resources
+- [ ] `patb://thoughts` — expose full note pool
+- [ ] `patb://tree` — expose tree.md file impact map
+- [ ] `patb://changes` — expose changes.md changelog
+- [ ] `patb://plan` — expose @plan contents
+
+### 5.4 Server entry + config
+- [ ] `mcp/src/index.ts` — register all tools + resources, start MCP server
+- [ ] `.vscode/mcp.json` — workspace MCP config pointing to `mcp/dist/index.js`
+- [ ] Add `npm install && npm run build` step to install flow; update mcp/README.md Setup section
+
+### 5.5 Keep self-referencing update method intact
+- [ ] SKILL.md version check + @resync flow: unchanged — README paste still works as bootstrap
+- [ ] After MCP install: update SKILL.md to call MCP tools (remember/forget/etc.) instead of writing markdown directly, while keeping markdown-direct as fallback when MCP is unavailable
+- [ ] `@resync` rebuilds skill AND re-runs `npm install && npm run build` in `mcp/` if present
+
+### 5.6 Docs + tests
+- [ ] Update main README: add MCP section with setup snippet (`.vscode/mcp.json`), clarify skill = fallback
+- [ ] Smoke tests: one test per tool against a tmp brain dir (vitest or plain node:test)
 
 ---
 

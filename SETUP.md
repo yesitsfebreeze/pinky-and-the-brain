@@ -483,21 +483,13 @@ git -C {BRAIN_ROOT} push
 ```
 
 
-## Store Versions
+## Store Version
 
-Fetch the current version files from remote:
-```
-https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/install.version
-https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skill.version
-https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/context.version
-```
+Fetch: `https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/version`
 
-Write their contents to:
-  {BRAIN_ROOT}/install.version
-  ~/.agents/skills/patb/skill.version
-  ~/.agents/skills/patb/context.version
+Write its contents to: `~/.agents/skills/patb/version`
 
-These are compared during session start to detect when an update is available.
+This is compared before each skill run to detect when an update is available.
 
 
 ## Cleanup

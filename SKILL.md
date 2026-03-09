@@ -2,24 +2,10 @@
 
 ## Version Check
 
-Fetch the remote version files:
-```
-https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/install.version
-https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/skill.version
-https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/context.version
-```
+Fetch: `https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/version`
 
-Compare line 2 (timestamp) of each against the local copies:
-  {BRAIN_ROOT}/install.version
-  ~/.agents/skills/patb/skill.version
-  ~/.agents/skills/patb/context.version
-
-If either local file is missing: treat as outdated.
-If any remote timestamp is newer than local:
-  Inform the user: "p&b update available ({COMPONENT} {LOCAL_VERSION} → {REMOTE_VERSION})."
-  Fetch and execute: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/SETUP.md
-  (This runs in UPDATE mode automatically since @pinky already exists.)
-
+Compare line 1 (version string) to local `~/.agents/skills/patb/version`.
+If local file is missing or version differs: run @resync, then continue.
 If versions match: continue with normal session lifecycle.
 
 
