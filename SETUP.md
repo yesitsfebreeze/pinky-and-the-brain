@@ -248,6 +248,49 @@ FETCH and EXECUTE: https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-th
 ````
 
 
+## MCP Server Bootstrap
+
+Resolve {HOME}:
+  Linux/macOS: run `echo $HOME`
+  Windows: use `%USERPROFILE%`
+  (Referred to as `{HOME}` below — always substitute the actual absolute path.)
+
+MCP install path: `{HOME}/.agents/skills/patb/mcp/`
+
+Check Node.js is available:
+  Run: `node --version`
+  If not found: warn — "p&b MCP server requires Node.js ≥18. Install from https://nodejs.org then run @resync to activate the MCP server." — set MCP_BUILD_FAILED = TRUE and skip ahead to **Brain Repo**.
+
+Download MCP source (adapt paths for OS):
+  Create `{HOME}/.agents/skills/patb/` if it doesn't exist.
+
+  Linux/macOS:
+  ```
+  git clone --filter=blob:none --sparse \
+    https://github.com/yesitsfebreeze/pinky-and-the-brain \
+    "{HOME}/.agents/skills/patb/_mcp_src"
+  git -C "{HOME}/.agents/skills/patb/_mcp_src" sparse-checkout set mcp
+  cp -r "{HOME}/.agents/skills/patb/_mcp_src/mcp/." "{HOME}/.agents/skills/patb/mcp/"
+  rm -rf "{HOME}/.agents/skills/patb/_mcp_src"
+  ```
+
+  Windows (PowerShell):
+  ```powershell
+  git clone --filter=blob:none --sparse `
+    https://github.com/yesitsfebreeze/pinky-and-the-brain `
+    "$env:USERPROFILE\.agents\skills\patb\_mcp_src"
+  git -C "$env:USERPROFILE\.agents\skills\patb\_mcp_src" sparse-checkout set mcp
+  Copy-Item -Recurse -Force "$env:USERPROFILE\.agents\skills\patb\_mcp_src\mcp\*" `
+    "$env:USERPROFILE\.agents\skills\patb\mcp\"
+  Remove-Item -Recurse -Force "$env:USERPROFILE\.agents\skills\patb\_mcp_src"
+  ```
+
+Build the server:
+  Linux/macOS: `npm install --prefix "{HOME}/.agents/skills/patb/mcp" && npm run build --prefix "{HOME}/.agents/skills/patb/mcp"`
+  Windows: `npm install --prefix "%USERPROFILE%\.agents\skills\patb\mcp" && npm run build --prefix "%USERPROFILE%\.agents\skills\patb\mcp"`
+  If build fails: print the error, set MCP_BUILD_FAILED = TRUE, warn user "MCP server build failed — run @resync after fixing Node.js setup", and continue.
+
+
 ## Brain Repo
 
 Ensure ~/.patb/ directory exists.
@@ -380,6 +423,64 @@ Runtime: invoke skill for remember/forget/query/list
 - "forget about..." → remove note, commit & push
 - "list brain contents" → show all brain repos + note counts
 ```
+
+
+## MCP Registration
+
+Skip if MCP_BUILD_FAILED is TRUE.
+
+MCP server path (use actual resolved {HOME}, not `~`):
+  `{HOME}/.agents/skills/patb/mcp/dist/index.js`
+
+Using the environment detected in **Always-Active Instructions**, write or merge the `patb` entry:
+
+| Environment              | Config file                                           | Merge key                 |
+|--------------------------|-------------------------------------------------------|---------------------------|
+| VS Code + GitHub Copilot | `{SOURCE_ROOT}/.vscode/mcp.json`                      | `servers`                 |
+| Cursor                   | `{HOME}/.cursor/mcp.json`                             | `mcpServers`              |
+| Windsurf                 | `{HOME}/.codeium/windsurf/mcp_config.json`            | `mcpServers`              |
+| Claude Code              | `{SOURCE_ROOT}/.mcp.json`                             | `mcpServers`              |
+| Cline / RooCode          | VS Code user `settings.json` → key `cline.mcpServers` | (nested)                  |
+| Unknown                  | Print manual setup instructions                       | —                         |
+
+Merge rule: read the JSON file (treat missing as `{}`). Add or replace the `patb` key under the merge key. Write back.
+
+**VS Code entry** (under `servers` in `.vscode/mcp.json`):
+```json
+"patb": {
+  "type": "stdio",
+  "command": "node",
+  "args": ["{HOME}/.agents/skills/patb/mcp/dist/index.js"],
+  "env": { "PATB_SOURCE_ROOT": "${workspaceFolder}" }
+}
+```
+
+**All other environments** (under `mcpServers`):
+```json
+"patb": {
+  "command": "node",
+  "args": ["{HOME}/.agents/skills/patb/mcp/dist/index.js"]
+}
+```
+
+**Cline / RooCode** — VS Code user `settings.json` paths:
+  Linux:   `~/.config/Code/User/settings.json`
+  macOS:   `~/Library/Application Support/Code/User/settings.json`
+  Windows: `%APPDATA%\Code\User\settings.json`
+  Merge `patb` into `cline.mcpServers` (same entry format as `mcpServers` above).
+
+**Unknown environment** — print:
+```
+To activate the p&b MCP server, add it to your MCP configuration:
+  name:    patb
+  command: node
+  args:    {HOME}/.agents/skills/patb/mcp/dist/index.js
+Restart your IDE after adding it.
+```
+
+After registering:
+  VS Code: run `workbench.action.reloadWindow` if available; otherwise prompt: "Reload the VS Code window to activate the p&b MCP server (Ctrl+Shift+P → Reload Window)."
+  Other IDEs: prompt user to restart or reload to activate the MCP server.
 
 
 ## Memory Init

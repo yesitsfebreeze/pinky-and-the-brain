@@ -41,8 +41,11 @@ export async function commitAndPush(dir: string, message: string): Promise<void>
 /**
  * Pull --rebase, then commit all changes and push.
  * This is the canonical "sync brain" operation used after every memory write.
+ *
+ * Set PATB_NO_GIT=1 to skip all git operations (useful in tests / CI).
  */
 export async function syncAndPush(dir: string, message: string): Promise<void> {
+  if (process.env.PATB_NO_GIT) return;
   await pullRebase(dir);
   await commitAndPush(dir, message);
 }

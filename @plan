@@ -76,7 +76,7 @@ Replace AI-instruction-based memory writes with a typed MCP server. The skill/RE
 
 ### 5.6 Docs + tests
 - [x] Update main README: add MCP section with setup snippet (`.vscode/mcp.json`), clarify skill = fallback
-- [ ] Smoke tests: one test per tool against a tmp brain dir (vitest or plain node:test)
+- [x] Smoke tests: one test per tool against a tmp brain dir (vitest or plain node:test)
 
 ---
 
