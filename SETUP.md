@@ -49,7 +49,7 @@ Write the following verbatim to ~/.agents/skills/patb/SKILL.md
 ---
 name: patb
 description: >
-  Manage cross-repository AI memory with per-project brain repos ({SLUG}.patb).
+  Manage cross-repository AI memory with per-project brain repos.
   MUST be invoked automatically on the FIRST message of every session when @pinky
   exists at workspace root — do not wait for user to ask.
   Also use when a repo has @pinky and @brain files, to sync memory, capture
