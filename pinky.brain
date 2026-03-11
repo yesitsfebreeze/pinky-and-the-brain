@@ -15,7 +15,7 @@ Run these steps exactly, in order, on every session start:
 0. **Version gate** — If ALL of the following are true, skip to step 8 (Read):
    - `pinky.brain` exists at project root.
    - `.pinky/` exists and contains all 6 required `.brain` files.
-   - If `branch:` is set: `.pinky/.git` is a file (worktree is intact).
+   - If `branch:` is set in frontmatter: `.pinky/.git` is a file (worktree is intact; skip if `branch:` is absent).
    This is a fast path — the brain is already installed and up to date.
 
 1. **Install** — If `pinky.brain` is NOT already on disk at the project root:
@@ -24,7 +24,7 @@ Run these steps exactly, in order, on every session start:
 
 2. **Discover** — Recursively scan the project for all `**/.pinky/` folders.
 
-3. **Ensure** — For each discovered `.pinky/` (and project root if none found):
+3. **Ensure** — For each discovered `.pinky/`. If none were found, create `.pinky/` at the project root first.
    Verify it contains all 6 required files (see LAYOUT).
    Create missing files with their comment-header only.
 
@@ -32,14 +32,16 @@ Run these steps exactly, in order, on every session start:
    Do not remove manually-added `@` external entries.
 
 5. **Load externals** — For every `@`-prefixed URL in SOURCES:
-   a. Derive SLUG from URL (last path segment, strip `.git`, lowercase).
-   b. Check if the remote repo has a `pinky` branch:
-      `git ls-remote --heads <URL> pinky`
-      - If found → clone/fetch only the `pinky` branch into `.pinky/@{SLUG}/`:
-        `git clone --single-branch --branch pinky <URL> .pinky/@{SLUG}`
-        (or `cd .pinky/@{SLUG} && git fetch origin pinky && git reset --hard origin/pinky`)
-      - If not found → clone the default branch, then look for `.brain` files in the repo root.
-   c. The `.brain` files (and `overview.brain`) live on the `pinky` branch — this is the convention.
+   a. Derive owner, repo, and SLUG from the URL:
+      - Strip `.git` suffix, extract last two path segments → `{owner}/{repo}`
+      - SLUG = `{repo}` lowercased
+   b. Fetch each `.brain` file directly from GitHub's raw content API (no cloning):
+      `https://raw.githubusercontent.com/{owner}/{repo}/pinky/{file}.brain`
+      Files: `overview`, `rules`, `ideas`, `notes`, `todos`, `files`
+      - Save fetched files under `.pinky/@{SLUG}/`
+      - Skip any file that returns 404
+   c. If all 6 files 404 (no `pinky` branch or no `.brain` files), fall back to `main`:
+      `https://raw.githubusercontent.com/{owner}/{repo}/main/{file}.brain`
    d. These are read-only — never write to external sources.
 
 6. **Branch sync** — If `branch:` is set in the frontmatter:
@@ -139,7 +141,9 @@ If none fire, do NOT touch any file. Silence is correct.
 NEVER write to THIS FILE unless the user explicitly asks.
 Only write the single file that changed.
 
-After every write, if branch sync is active:
+Scoring applies on every insert: if a new entry falls below its category threshold, discard it — do not write.
+
+After every write, if `branch:` is set in frontmatter (branch sync is active):
 ```sh
 cd .pinky && git add -A && git commit -m "pinky: update" && git push && cd -
 ```
@@ -149,6 +153,12 @@ cd .pinky && git add -A && git commit -m "pinky: update" && git push && cd -
 > **CRITICAL**: `.pinky/` IS the worktree. Never create a separate worktree
 > folder (e.g., `.pinky-wt`). There is no copy step. The worktree checkout
 > lives directly at `.pinky/`.
+
+Working branches MUST stay clean — no `.brain` files in commits. This is not optional.
+Add to `.gitignore` on working branches:
+```
+**/.pinky/
+```
 
 ### First-time setup (orphan branch does not exist)
 
@@ -266,10 +276,12 @@ Entry format:
 Reason: why important
 Relevance: 1-1000
 Freshness: 1.0 | 0.5
-LastRef: <interaction count>
+LastRef: <turn label, e.g. "session-3">  ← update each time this note is referenced
 Score: computed
 Related: #type-title, ...
 ```
+
+Set Freshness to 1.0 if referenced in the last 3 turns of the current session; otherwise 0.5.
 
 ### todos.brain
 ```
@@ -326,31 +338,7 @@ High-level structure (optional, keep brief).
 Current phase: planning | active | maintenance
 ```
 
-## BRANCH STRATEGY
 
-The orphan branch (set in frontmatter `branch:`) MUST store ALL `.pinky/` data.
-`.pinky/` IS a git worktree checked out to the orphan branch — no separate worktree folder needed.
-Working branches MUST stay clean — no memory files in commits. This is not optional.
-
-### First-time setup (agent runs once automatically):
-```sh
-git checkout --orphan pinky
-git rm -rf .
-# create all 6 .brain files with headers (directly in repo root, they live at .pinky/ in the worktree)
-git add .
-git commit -m "pinky: init"
-git push -u origin pinky
-git checkout -
-git worktree add .pinky pinky
-```
-
-The `.pinky/` folder is both the worktree and the data directory. Edits go directly
-into the worktree — commit and push from inside `.pinky/` with no copy step.
-
-### .gitignore (on working branch):
-```
-**/.pinky/
-```
 
 ## MULTI-REPO
 
@@ -358,9 +346,8 @@ When a project has submodules, vendors, or monorepo packages:
 - Each subpath can have its own `.pinky/` folder
 - BOOT discovers them all via `**/.pinky/`
 - External repos (`@` prefix) are fetched read-only into `.pinky/@{SLUG}/`
-- **External repos MUST use a `pinky` orphan branch** to store their `.brain` files.
-  This is the same convention used locally — the `pinky` branch is the canonical
-  location for all brain data. When linking a repo, the agent checks for this branch first.
+- **External repos should store `.brain` files on a `pinky` orphan branch** — the same
+  convention used locally. BOOT step 5 fetches from `pinky` branch first, falls back to `main`.
 - Cross-repo knowledge flows through external links
 - `overview.brain` from external sources gives quick context about the linked project
 
