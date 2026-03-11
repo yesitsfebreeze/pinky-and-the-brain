@@ -1,5 +1,5 @@
 ---
-version: 2
+version: 3
 branch: pinky
 ---
 
@@ -11,6 +11,12 @@ On every session start, execute the BOOT sequence below before doing anything el
 ## BOOT
 
 Run these steps exactly, in order, on every session start:
+
+0. **Version gate** — If ALL of the following are true, skip to step 8 (Read):
+   - `pinky.brain` exists at project root.
+   - `.pinky/` exists and contains all 5 required `.brain` files.
+   - If `branch:` is set: `.pinky/.git` is a file (worktree is intact).
+   This is a fast path — the brain is already installed and up to date.
 
 1. **Install** — If `pinky.brain` is NOT already on disk at the project root:
    a. Save THIS FILE as `pinky.brain` at project root (closest `.git` or CWD).
@@ -31,10 +37,15 @@ Run these steps exactly, in order, on every session start:
    c. These are read-only — never write to external sources.
 
 6. **Branch sync** — If `branch:` is set in the frontmatter:
-   a. If the orphan branch doesn't exist → create it (see BRANCH STRATEGY).
-   b. If `.pinky/` worktree doesn't exist → `git worktree add .pinky {branch}`.
-      `.pinky/` IS the worktree — no separate folder, no copy step.
-   c. Pull latest: `cd .pinky && git pull --rebase && cd -`.
+   a. If the orphan branch doesn't exist → create it (see BRANCH STRATEGY below).
+   b. Check if `.pinky/` is already a worktree: `[ -f .pinky/.git ]`.
+      - If YES → worktree is already set up, skip to (c).
+      - If `.pinky/` exists but is a regular dir (no `.git` file inside):
+        save its contents, delete the dir, then continue.
+      - `git worktree prune` first to clear stale records.
+      - `git worktree add .pinky {branch}` — this IS the worktree.
+        **No separate worktree folder. No copy step. `.pinky/` = worktree.**
+   c. Pull latest: `cd .pinky && git pull --rebase 2>/dev/null; cd -`.
 
 7. **Integrate** — Add pinky.brain to the current tool's repo-level agent config:
    a. Detect which file applies:
@@ -113,6 +124,53 @@ After every write, if branch sync is active:
 ```sh
 cd .pinky && git add -A && git commit -m "pinky: update" && git push && cd -
 ```
+
+## BRANCH STRATEGY
+
+> **CRITICAL**: `.pinky/` IS the worktree. Never create a separate worktree
+> folder (e.g., `.pinky-wt`). There is no copy step. The worktree checkout
+> lives directly at `.pinky/`.
+
+### First-time setup (orphan branch does not exist)
+
+```sh
+# 0. Save existing .brain files if present
+tmpdir=$(mktemp -d)
+[ -d .pinky ] && cp .pinky/*.brain "$tmpdir/" 2>/dev/null
+rm -rf .pinky
+
+# 1. Create orphan via temp worktree (avoids disturbing main checkout)
+git worktree add --detach /tmp/_pinky_init
+pushd /tmp/_pinky_init
+git checkout --orphan pinky
+git rm -rf . --quiet 2>/dev/null
+git clean -fd --quiet
+
+# 2. Restore saved .brain files or create defaults
+cp "$tmpdir"/*.brain . 2>/dev/null || \
+  for f in rules ideas notes todos files; do echo "# ${f}.brain" > "${f}.brain"; done
+git add -A && git commit -m "pinky: init brain"
+popd
+
+# 3. Tear down temp worktree, attach real one
+git worktree remove /tmp/_pinky_init --force 2>/dev/null
+git worktree add .pinky pinky
+```
+
+### Reconnecting (branch exists, worktree missing or stale)
+
+```sh
+rm -rf .pinky 2>/dev/null        # remove stale regular dir if present
+git worktree prune                # clean dead worktree records
+git worktree add .pinky pinky     # attach
+```
+
+### How to tell if `.pinky/` is a worktree
+
+A git worktree contains a **file** named `.git` (not a folder).
+Check: `[ -f .pinky/.git ]` → true = worktree, false = regular dir.
+
+---
 
 ## SCORING
 
@@ -252,6 +310,49 @@ When a project has submodules, vendors, or monorepo packages:
 - BOOT discovers them all via `**/.pinky/`
 - External repos (`@` prefix) are fetched read-only into `.pinky/@{SLUG}/`
 - Cross-repo knowledge flows through external links
+
+## COMMANDS
+
+Commands are triggered when the user types `@<command>` in the chat.
+
+### @improve
+
+Self-update and self-analysis. Run these steps in order:
+
+1. **Fetch upstream** — Download the latest `pinky.brain` from the bootstrap URL:
+   `https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/pinky.brain`
+
+2. **Compare versions** — Parse the `version:` frontmatter from both the local
+   and fetched file.
+   - If versions match → report "pinky.brain is up to date (v{N})." and skip to step 4.
+   - If upstream is newer → continue to step 3.
+
+3. **Update** — Replace the local `pinky.brain` with the fetched version.
+   Then re-run the full BOOT sequence (skip step 0 version gate).
+   Report: "Updated pinky.brain v{OLD} → v{NEW}."
+
+4. **Self-analysis** — Inspect the current state of all `.brain` files:
+   a. **Freshness audit** — Recompute freshness scores in `notes.brain`.
+      Flag entries that dropped below threshold.
+   b. **Scoring check** — Verify all entries across every `.brain` file have
+      valid scores and are sorted descending. Fix any drift.
+   c. **Dedup scan** — Check for semantically duplicate or near-duplicate
+      entries. Merge or discard per DEDUP & MERGE rules.
+   d. **Dangling refs** — Find `Related:` links that point to deleted entries.
+      Remove them.
+   e. **Layout check** — Confirm all 5 files exist with correct headers.
+      Recreate any missing files.
+   f. **Template conformance** — Verify entries match the TEMPLATES format.
+      Flag malformed entries.
+
+5. **Report** — Summarize findings to the user:
+   - Version status (up to date or updated)
+   - Number of entries per `.brain` file
+   - Issues found and auto-fixed
+   - Issues that need user input
+   - overall health score (0–100%)
+
+---
 
 ## BOOTSTRAPPING
 

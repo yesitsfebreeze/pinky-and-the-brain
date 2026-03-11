@@ -7,7 +7,7 @@ Persistent AI memory that lives in your repo. One URL. Zero config.
 Tell your AI agent:
 
 ```
-Follow instructions in https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/pinky.brain
+Follow instructions in https://raw.githubusercontent.com/yesitsfebreeze/pinky-and-the-brain/refs/heads/main/pinky.brain?v=3
 ```
 
 That's it. The agent will:
