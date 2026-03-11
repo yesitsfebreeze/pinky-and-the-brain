@@ -1,0 +1,29 @@
+<!-- overview.brain — Project overview and prominent features. -->
+<!-- Updated when project scope, purpose, or key features change. -->
+
+# pinky-and-the-brain
+
+A persistent memory system for AI coding agents — one file, full brain.
+
+## Purpose
+Give AI agents long-term memory across sessions using a simple convention:
+an orphan git branch (`pinky`) stores structured `.brain` files that the agent
+reads, writes, and syncs automatically.
+
+## Key Features
+- **Single-file bootstrap** — Drop `pinky.brain` into any repo and the agent self-installs.
+- **Orphan branch storage** — Brain data lives on a dedicated `pinky` branch, keeping working branches clean.
+- **Git worktree integration** — `.pinky/` is a worktree, so commits/pushes happen seamlessly.
+- **Multi-repo support** — Link external repos via `@URL`; their `pinky` branch is fetched read-only.
+- **Scored entries** — Rules, ideas, notes, todos, and files are scored and auto-pruned.
+- **Cross-tool** — Works with GitHub Copilot, Cursor, Windsurf, Cline, and generic agents.
+
+## Architecture
+- `pinky.brain` — The bootstrap/instruction file (lives on main branch).
+- `.pinky/` — Worktree checked out to the `pinky` orphan branch, containing:
+  - `overview.brain` — This file (project overview).
+  - `rules.brain`, `ideas.brain`, `notes.brain`, `todos.brain`, `files.brain` — Structured memory.
+- External sources nest under `.pinky/@{slug}/`.
+
+## Status
+Current phase: active
