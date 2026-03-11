@@ -14,7 +14,7 @@ Run these steps exactly, in order, on every session start:
 
 1. **Install** — If `pinky.brain` is NOT already on disk at the project root:
    a. Save THIS FILE as `pinky.brain` at project root (closest `.git` or CWD).
-   b. Add `**/.pinky/` and `.pinky-wt/` to `.gitignore` (create it if missing).
+   b. Add `**/.pinky/` to `.gitignore` (create it if missing).
 
 2. **Discover** — Recursively scan the project for all `**/.pinky/` folders.
 
@@ -32,13 +32,34 @@ Run these steps exactly, in order, on every session start:
 
 6. **Branch sync** — If `branch:` is set in the frontmatter:
    a. If the orphan branch doesn't exist → create it (see BRANCH STRATEGY).
-   b. If `.pinky-wt/` worktree doesn't exist → `git worktree add .pinky-wt {branch}`.
-   c. Pull latest: `cd .pinky-wt && git pull --rebase && cd -`.
-   d. Copy data in: `cp -r .pinky-wt/.pinky/* .pinky/` (for each discovered folder).
+   b. If `.pinky/` worktree doesn't exist → `git worktree add .pinky {branch}`.
+      `.pinky/` IS the worktree — no separate folder, no copy step.
+   c. Pull latest: `cd .pinky && git pull --rebase && cd -`.
 
-7. **Read** — Load only the `.brain` files relevant to the current task.
+7. **Integrate** — Add pinky.brain to the current tool's repo-level agent config:
+   a. Detect which file applies:
+      - GitHub Copilot → `.github/copilot-instructions.md`
+      - Cursor → `.cursorrules`
+      - Windsurf → `.windsurfrules`
+      - Cline → `.clinerules`
+      - Generic → `.instructions.md`
+   b. If the file already references `pinky.brain` → skip.
+   c. **ASK the user for permission** before modifying or creating the file.
+      Prompt: "Can I add a pinky.brain reference to `<detected file>`? This will tell the agent to read pinky.brain on every session. Your existing settings will be preserved."
+   d. If approved:
+      - If the file exists, **append** the instruction block below to the end — do NOT remove or alter any existing content.
+      - If the file does not exist, create it with only the instruction block.
+      - Instruction block to add:
+        ```
+        <!-- pinky.brain integration -->
+        On every session start, read and follow the instructions in `pinky.brain` at the project root before doing anything else.
+        ```
+   e. If the user's repo contains the raw-URL bootstrap line (`Follow instructions in https://…/pinky.brain`), ask: "The external bootstrap URL is no longer needed since pinky.brain is local. Want me to replace it with a pointer to the local file?"
+      If approved, replace that line with: `Follow instructions in pinky.brain`
 
-8. **Proceed** — Handle the user's request.
+8. **Read** — Load only the `.brain` files relevant to the current task.
+
+9. **Proceed** — Handle the user's request.
 
 ## SOURCES
 
@@ -90,8 +111,7 @@ Only write the single file that changed.
 
 After every write, if branch sync is active:
 ```sh
-cp -r .pinky/* .pinky-wt/.pinky/
-cd .pinky-wt && git add -A && git commit -m "pinky: update" && git push && cd -
+cd .pinky && git add -A && git commit -m "pinky: update" && git push && cd -
 ```
 
 ## SCORING
@@ -202,25 +222,27 @@ Entry format: `Frequency | Centrality | Path | Why it matters | Related: #type-t
 ## BRANCH STRATEGY
 
 The orphan branch (set in frontmatter `branch:`) MUST store ALL `.pinky/` data.
+`.pinky/` IS a git worktree checked out to the orphan branch — no separate worktree folder needed.
 Working branches MUST stay clean — no memory files in commits. This is not optional.
 
 ### First-time setup (agent runs once automatically):
 ```sh
 git checkout --orphan pinky
 git rm -rf .
-mkdir -p .pinky
-# create all 5 .brain files with headers
-git add .pinky/
+# create all 5 .brain files with headers (directly in repo root, they live at .pinky/ in the worktree)
+git add .
 git commit -m "pinky: init"
 git push -u origin pinky
 git checkout -
-git worktree add .pinky-wt pinky
+git worktree add .pinky pinky
 ```
+
+The `.pinky/` folder is both the worktree and the data directory. Edits go directly
+into the worktree — commit and push from inside `.pinky/` with no copy step.
 
 ### .gitignore (on working branch):
 ```
 **/.pinky/
-.pinky-wt/
 ```
 
 ## MULTI-REPO
