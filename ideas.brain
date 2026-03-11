@@ -1,1 +1,8 @@
 <!-- ideas.brain — Score = (Relevance + Impact) / 2. Discard if < 300. -->
+
+!! Sub-brain delegation for monorepos and large projects
+Detailed: Scatter autonomous .pinky/ sub-brains across subdirectories. Each sub-brain owns its subtree's files, rules, and notes. Root files.brain links to sub-brains as folder entries and never lists files inside delegated subtrees. On every request, iterate discovered sub-brains as categories — load relevant ones alongside root brain.
+Relevance: 900
+Impact: 800
+Score: 850
+Related: #note-sub-brain-architecture

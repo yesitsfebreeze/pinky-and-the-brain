@@ -1,1 +1,9 @@
 <!-- notes.brain — Score = Relevance × Freshness. Discard if < 300. -->
+
+!! Sub-brain architecture: file delegation and category loading
+Reason: Core design decision — sub-brains create distributed data minds. Root files.brain links .pinky/ folders, never files inside them. BOOT step 8 resolves categories by checking each sub-brain's overview.brain for relevance before loading. Sub-brain wins for scope-local decisions, root wins cross-cutting.
+Relevance: 900
+Freshness: 1.0
+LastRef: 1
+Score: 900
+Related: #idea-sub-brain-delegation
